@@ -253,8 +253,12 @@ extensions_options! {
         pub io_coalesce_distance_bytes: Option<usize>, default = None
         /// The largest single request, in bytes, that coalescing may build.
         ///
-        /// Leave as `None` for the reader's default (16 MiB). Only consulted together with
-        /// `io_coalesce_distance_bytes`; see that option.
+        /// Leave as `None` for the reader's default (16 MiB). May be set independently of
+        /// `io_coalesce_distance_bytes`; the unset field keeps its default. A single segment
+        /// larger than this is still read whole, and alignment may extend a request by up to
+        /// one alignment unit. A custom [`VortexReaderFactory`] is not affected by either option.
+        ///
+        /// [`VortexReaderFactory`]: crate::reader::VortexReaderFactory
         pub io_coalesce_max_size_bytes: Option<usize>, default = None
     }
 }
@@ -1111,7 +1115,7 @@ mod tests {
                 (c1 VARCHAR NOT NULL, c2 INT NOT NULL) \
                 STORED AS vortex \
                 LOCATION 'table/' \
-                OPTIONS( footer_initial_read_size_bytes '12345', predicate_pushdown 'false', scan_concurrency '3', scan_v2 '{scan_v2}' );"),
+                OPTIONS( footer_initial_read_size_bytes '12345', predicate_pushdown 'false', scan_concurrency '3', scan_v2 '{scan_v2}', io_coalesce_distance_bytes '65536' );"),
             )
             .await?
             .collect()
@@ -1130,6 +1134,8 @@ mod tests {
         assert!(!format.options().predicate_pushdown);
         assert_eq!(format.options().scan_concurrency, Some(3));
         assert_eq!(format.options().scan_v2, scan_v2);
+        assert_eq!(format.options().io_coalesce_distance_bytes, Some(65536));
+        assert_eq!(format.options().io_coalesce_max_size_bytes, None);
         Ok(())
     }
 

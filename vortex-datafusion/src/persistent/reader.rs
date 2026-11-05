@@ -123,7 +123,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn factory_passes_its_config_to_every_reader() -> DFResult<()> {
+    async fn factory_passes_its_config_to_the_readers_it_creates() -> DFResult<()> {
         let factory = DefaultVortexReaderFactory::new(Arc::new(InMemory::new()))
             .with_coalesce_config(Some(CoalesceConfig::new(64 * 1024, 4 << 20)));
         let got = reader(&factory)?.coalesce_config();
@@ -147,5 +147,10 @@ mod tests {
         opts.io_coalesce_max_size_bytes = Some(2 << 20);
         let got = opts.coalesce_config().expect("both set");
         assert_eq!((got.distance, got.max_size), (64 * 1024, 2 << 20));
+
+        opts.io_coalesce_distance_bytes = None;
+        let got = opts.coalesce_config().expect("max size set");
+        assert_eq!(got.distance, CoalesceConfig::object_storage().distance);
+        assert_eq!(got.max_size, 2 << 20);
     }
 }

@@ -735,6 +735,47 @@ mod tests {
         Ok(())
     }
 
+    #[tokio::test]
+    async fn create_vortex_opener_passes_io_coalescing_to_the_default_reader() -> anyhow::Result<()>
+    {
+        use datafusion_datasource::PartitionedFile;
+        use vortex::io::CoalesceConfig;
+        use vortex::io::VortexReadAt;
+        use vortex::io::session::RuntimeSessionExt;
+
+        let file_schema = Arc::new(Schema::new(vec![Field::new("a", DataType::Int32, false)]));
+        let session = VortexSession::default().with_tokio();
+        let options = VortexTableOptions {
+            io_coalesce_distance_bytes: Some(64 * 1024),
+            ..Default::default()
+        };
+        let source = VortexSource::new(TableSchema::from(file_schema), session.clone())
+            .with_options(options);
+
+        let config = FileScanConfigBuilder::new(
+            ObjectStoreUrl::local_filesystem(),
+            Arc::new(source.clone()),
+        )
+        .build();
+        let opener = source.create_vortex_opener(
+            Arc::new(InMemory::new()) as Arc<dyn ObjectStore>,
+            &config,
+            0,
+        )?;
+
+        let reader = opener
+            .vortex_reader_factory
+            .create_reader(&PartitionedFile::new("part.vortex", 0), &session)?;
+        let got = reader
+            .coalesce_config()
+            .expect("object store readers coalesce");
+        assert_eq!(
+            (got.distance, got.max_size),
+            (64 * 1024, CoalesceConfig::object_storage().max_size)
+        );
+        Ok(())
+    }
+
     #[test]
     fn try_pushdown_filters_accepts_octet_length() -> anyhow::Result<()> {
         let schema = Arc::new(Schema::new(vec![Field::new("name", DataType::Utf8, false)]));
