@@ -44,6 +44,7 @@ use futures::TryStreamExt as _;
 use futures::stream;
 use object_store::ObjectMeta;
 use object_store::ObjectStore;
+use object_store::path::Path;
 use vortex::VortexSessionDefault;
 use vortex::aggregate_fn::AggregateFnVTableExt;
 use vortex::aggregate_fn::EmptyOptions;
@@ -61,6 +62,7 @@ use vortex::file::EOF_SIZE;
 use vortex::file::MAX_POSTSCRIPT_SIZE;
 use vortex::file::OpenOptionsSessionExt;
 use vortex::file::VORTEX_FILE_EXTENSION;
+use vortex::io::CoalesceConfig;
 use vortex::io::object_store::ObjectStoreReadAt;
 use vortex::io::session::RuntimeSessionExt;
 use vortex::scalar::Scalar;
@@ -239,11 +241,65 @@ extensions_options! {
         /// with `SET vortex.scan_concurrency = <n>`, or per table with
         /// `OPTIONS(scan_concurrency '<n>')`.
         pub scan_concurrency: Option<usize>, default = None
+        /// The largest gap, in bytes, between two segment reads that the object-store reader
+        /// still merges into one request.
+        ///
+        /// Leave as `None` for the reader's default (1 MiB, see
+        /// `CoalesceConfig::object_storage`). A small file whose needed segments straddle such a
+        /// gap reads the gap too, so a store that charges per byte rather than per request
+        /// (or that decrypts what it fetches) may want this near its block size. Override per
+        /// session with `SET vortex.io_coalesce_distance_bytes = <n>`, or per table with
+        /// `OPTIONS(io_coalesce_distance_bytes '<n>')`.
+        pub io_coalesce_distance_bytes: Option<usize>, default = None
+        /// The largest single request, in bytes, that coalescing may build.
+        ///
+        /// Leave as `None` for the reader's default (16 MiB). Only consulted together with
+        /// `io_coalesce_distance_bytes`; see that option.
+        pub io_coalesce_max_size_bytes: Option<usize>, default = None
+    }
+}
+
+impl VortexTableOptions {
+    /// The I/O coalescing the object-store reader should use, or `None` to keep its default.
+    ///
+    /// A field left unset takes its value from [`CoalesceConfig::object_storage`], so setting
+    /// only the distance keeps the default request cap.
+    pub fn coalesce_config(&self) -> Option<CoalesceConfig> {
+        if self.io_coalesce_distance_bytes.is_none() && self.io_coalesce_max_size_bytes.is_none() {
+            return None;
+        }
+        let default = CoalesceConfig::object_storage();
+        Some(CoalesceConfig::new(
+            self.io_coalesce_distance_bytes
+                .map_or(default.distance, |n| n as u64),
+            self.io_coalesce_max_size_bytes
+                .map_or(default.max_size, |n| n as u64),
+        ))
     }
 }
 
 impl ConfigExtension for VortexTableOptions {
     const PREFIX: &'static str = "vortex";
+}
+
+/// The object-store reader every file open in this module uses, with the table's I/O
+/// coalescing applied when it is set.
+fn object_store_reader(
+    store: Arc<dyn ObjectStore>,
+    location: Path,
+    session: &VortexSession,
+    opts: &VortexTableOptions,
+) -> ObjectStoreReadAt {
+    let reader = ObjectStoreReadAt::new_with_allocator(
+        store,
+        location,
+        session.handle(),
+        session.allocator(),
+    );
+    match opts.coalesce_config() {
+        Some(config) => reader.with_coalesce_config(config),
+        None => reader,
+    }
 }
 
 /// Registration entry point for the file-backed Vortex integration.
@@ -534,11 +590,11 @@ impl FileFormat for VortexFormat {
                     }
 
                     // Not entry or invalid - open the file
-                    let reader = Arc::new(ObjectStoreReadAt::new_with_allocator(
+                    let reader = Arc::new(object_store_reader(
                         store,
                         object.location.clone(),
-                        session.handle(),
-                        session.allocator(),
+                        &session,
+                        &opts,
                     ));
 
                     let vxf = session
@@ -613,11 +669,11 @@ impl FileFormat for VortexFormat {
                 Some(metadata) => metadata,
                 None => {
                     // Not entry - open the file
-                    let reader = Arc::new(ObjectStoreReadAt::new_with_allocator(
+                    let reader = Arc::new(object_store_reader(
                         store,
                         object.location.clone(),
-                        session.handle(),
-                        session.allocator(),
+                        &session,
+                        &opts,
                     ));
 
                     let vxf = session
