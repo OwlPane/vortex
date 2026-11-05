@@ -48,7 +48,6 @@ use vortex::VortexSessionDefault;
 use vortex::aggregate_fn::AggregateFnVTableExt;
 use vortex::aggregate_fn::EmptyOptions;
 use vortex::aggregate_fn::fns::is_constant::IsConstant;
-use vortex::array::memory::MemorySessionExt;
 use vortex::dtype::DType;
 use vortex::dtype::FieldPath;
 use vortex::dtype::PType;
@@ -61,8 +60,6 @@ use vortex::file::EOF_SIZE;
 use vortex::file::MAX_POSTSCRIPT_SIZE;
 use vortex::file::OpenOptionsSessionExt;
 use vortex::file::VORTEX_FILE_EXTENSION;
-use vortex::io::object_store::ObjectStoreReadAt;
-use vortex::io::session::RuntimeSessionExt;
 use vortex::scalar::Scalar;
 use vortex::scalar::ScalarValue as VortexScalarValue;
 use vortex::session::VortexSession;
@@ -239,6 +236,11 @@ extensions_options! {
         /// with `SET vortex.scan_concurrency = <n>`, or per table with
         /// `OPTIONS(scan_concurrency '<n>')`.
         pub scan_concurrency: Option<usize>, default = None
+        /// Maximum gap, in bytes, between two reads that should be fetched as one request.
+        ///
+        /// Unset keeps the object-store default (`CoalesceConfig::object_storage`, 1 MiB).
+        /// Parsed from `OPTIONS(coalesce_distance_bytes '<n>')` or `SET vortex.coalesce_distance_bytes = <n>`.
+        pub coalesce_distance_bytes: Option<u64>, default = None
     }
 }
 
@@ -534,11 +536,11 @@ impl FileFormat for VortexFormat {
                     }
 
                     // Not entry or invalid - open the file
-                    let reader = Arc::new(ObjectStoreReadAt::new_with_allocator(
+                    let reader = Arc::new(crate::persistent::reader::object_store_reader(
                         store,
                         object.location.clone(),
-                        session.handle(),
-                        session.allocator(),
+                        &session,
+                        opts.coalesce_distance_bytes,
                     ));
 
                     let vxf = session
@@ -613,11 +615,11 @@ impl FileFormat for VortexFormat {
                 Some(metadata) => metadata,
                 None => {
                     // Not entry - open the file
-                    let reader = Arc::new(ObjectStoreReadAt::new_with_allocator(
+                    let reader = Arc::new(crate::persistent::reader::object_store_reader(
                         store,
                         object.location.clone(),
-                        session.handle(),
-                        session.allocator(),
+                        &session,
+                        opts.coalesce_distance_bytes,
                     ));
 
                     let vxf = session

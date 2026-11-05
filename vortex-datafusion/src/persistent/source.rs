@@ -350,10 +350,12 @@ impl VortexSource {
             .clone()
             .unwrap_or_else(|| Arc::new(DefaultPhysicalExprAdapterFactory));
 
-        let vortex_reader_factory = self
-            .vortex_reader_factory
-            .clone()
-            .unwrap_or_else(|| Arc::new(DefaultVortexReaderFactory::new(object_store)));
+        let vortex_reader_factory = self.vortex_reader_factory.clone().unwrap_or_else(|| {
+            Arc::new(
+                DefaultVortexReaderFactory::new(object_store)
+                    .with_coalesce_distance(self.options.coalesce_distance_bytes),
+            )
+        });
 
         let opener = VortexOpener {
             partition,
