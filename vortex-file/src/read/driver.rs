@@ -270,8 +270,10 @@ impl State {
 
                 // Check if this request is within coalescing distance of our current range
                 let req_end = req_offset + req.length as u64;
-                if (req_offset <= current_end + window.distance && req_end >= current_start)
-                    || (req_end + window.distance >= current_start && req_offset <= current_end)
+                if (req_offset <= current_end.saturating_add(window.distance)
+                    && req_end >= current_start)
+                    || (req_end.saturating_add(window.distance) >= current_start
+                        && req_offset <= current_end)
                 {
                     // Calculate what the new range would be if we include this request
                     let new_start = current_start.min(req_offset);
