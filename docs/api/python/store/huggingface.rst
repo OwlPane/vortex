@@ -19,7 +19,7 @@ feature is needed.
      - Model
 
 ``<revision>`` is a branch, tag or commit, defaulting to ``main``. A revision containing ``/`` must
-be percent-encoded, e.g. ``hf://datasets/org/name@refs%2Fconvert%2Fparquet/data/train.vortex``.
+be percent-encoded, e.g. ``hf://datasets/org/name@refs%2Fpr%2F1/data/train.vortex``.
 
 Configuration comes from the same environment variables ``huggingface_hub`` reads:
 
@@ -76,7 +76,7 @@ authenticate from ``HF_TOKEN`` or the saved login:
    import vortex as vx
    from vortex.store import HfStore
 
-   store = HfStore("org/name", revision="refs/convert/parquet", token="hf_...")
+   store = HfStore("org/name", revision="refs/pr/1", token="hf_...")
 
    # With `store=`, the path is a path within the repository.
    vxf = vx.open("data/train.vortex", store=store)

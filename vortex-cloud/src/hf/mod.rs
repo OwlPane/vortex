@@ -19,10 +19,10 @@
 //! ```
 //!
 //! matching the paths [`huggingface_hub`'s `HfFileSystem`][hffs] accepts. A revision containing `/`
-//! (e.g. `refs/convert/parquet`) must be percent-encoded in the URL, as it must be there:
+//! (e.g. `refs/pr/1`) must be percent-encoded in the URL, as it must be there:
 //!
 //! ```text
-//! hf://datasets/org/name@refs%2Fconvert%2Fparquet/data/train.vortex
+//! hf://datasets/org/name@refs%2Fpr%2F1/data/train.vortex
 //! ```
 //!
 //! [hffs]: https://huggingface.co/docs/huggingface_hub/guides/hf_file_system
@@ -82,7 +82,7 @@ const SPACES_HOST: &str = "spaces";
 
 /// Characters escaped when a revision is spliced into the `resolve` path.
 ///
-/// `/` is the point of this: the Hub routes `refs/convert/parquet` only in its `%2F` form, since an
+/// `/` is the point of this: the Hub routes `refs/pr/1` only in its `%2F` form, since an
 /// unescaped `/` would read as another path segment.
 const REVISION_ESCAPES: &AsciiSet = &CONTROLS.add(b'/').add(b'%').add(b'?').add(b'#').add(b' ');
 
@@ -199,7 +199,7 @@ pub struct HfConfig {
     pub repo_type: HfRepoType,
     /// The repository, as `<owner>/<name>`.
     pub repo_id: String,
-    /// The revision to read: a branch, tag or commit. Held decoded, so `refs/convert/parquet` is
+    /// The revision to read: a branch, tag or commit. Held decoded, so `refs/pr/1` is
     /// spelled with `/`; it is percent-encoded when the `resolve` URL is built.
     pub revision: String,
     /// Bearer token for private and gated repositories. `None` reads anonymously.

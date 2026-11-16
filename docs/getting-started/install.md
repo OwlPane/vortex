@@ -44,11 +44,10 @@ quickstarts for [Python](python.rst), [Rust](rust.rst), and [Java](java.md).
 
 ## Sample data
 
-This quickstart uses the NYC Yellow Taxi trip dataset. More months and datasets are available
-from the [NYC TLC trip record data page](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
-
-Download a single month (~50 MB Parquet):
+This quickstart uses a 1,000-row sample of the NYC Yellow Taxi trip dataset, stored as an Arrow
+IPC file. More data is available from the
+[NYC TLC trip record data page](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page).
 
 ```bash
-curl -O https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet
+curl -O https://docs.vortex.dev/_static/example.arrow
 ```

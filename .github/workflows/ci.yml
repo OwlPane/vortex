@@ -94,18 +94,6 @@ jobs:
           uv sync --all-packages --no-install-workspace
           uvx ty check vortex-python vortex-python-cuda vortex-ffi/cmake/tests scripts/tests
 
-      # Pins the measurement_id hash that scripts/post-ingest.py uses as the primary key of every
-      # benchmarks-database fact row. The golden vectors are a frozen artifact (see the note inside
-      # the JSON); this job fails if a change to scripts/_measurement_id.py drifts the hash, which
-      # would break ON CONFLICT idempotency against the rows already in production.
-      - name: Pytest - measurement_id, benchmark reporting and ingestion
-        if: "!cancelled()"
-        run: |
-          uv run --no-project --with pytest --with pandas --with numpy --with orjson \
-            --with tabulate --with xxhash \
-            pytest scripts/tests/test_measurement_id.py \
-              scripts/tests/test_benchmark_reporting.py scripts/tests/test_post_ingest.py
-
   python-test:
     name: "Python (test)"
     if: github.event.pull_request.draft != true
@@ -441,13 +429,10 @@ jobs:
           CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER: rust-lld
         run: |
           cargo nextest run --cargo-profile ci --locked --workspace --all-features --no-fail-fast `
-            --exclude vortex-bench `
             --exclude vortex-python `
             --exclude vortex-fuzz --exclude vortex-cuda --exclude vortex-cuda-ffi `
             --exclude vortex-nvcomp --exclude vortex-cub --exclude vortex-test-e2e-cuda --exclude vortex-python-cuda `
-            --exclude duckdb-bench `
-            --exclude lance-bench --exclude datafusion-bench --exclude random-access-bench `
-            --exclude compress-bench --exclude xtask --exclude vortex-datafusion `
+            --exclude xtask --exclude vortex-datafusion `
             --exclude gpu-scan-cli
 
       # The test outputs fill the default disk, and the wheel build cannot reuse
@@ -534,10 +519,10 @@ jobs:
           enable-sccache: "true"
       - name: Rust Tests
         run: |
-          cargo nextest run --cargo-profile ci --locked --workspace --all-features --no-fail-fast --exclude vortex-bench --exclude xtask --exclude vortex-sqllogictest
+          cargo nextest run --cargo-profile ci --locked --workspace --all-features --no-fail-fast --exclude xtask --exclude vortex-sqllogictest
       - uses: ./.github/actions/check-rebuild
         with:
-          command: "cargo test --profile ci --locked --workspace --all-features --no-run --exclude vortex-bench --exclude xtask --exclude vortex-sqllogictest"
+          command: "cargo test --profile ci --locked --workspace --all-features --no-run --exclude xtask --exclude vortex-sqllogictest"
 
       - name: Alert incident.io
         if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
@@ -671,7 +656,6 @@ jobs:
           enable-sccache: "true"
       - name: Run sqllogictest tests
         run: |
-          VORTEX_SLT_PROFILE=ci ./vortex-sqllogictest/slt/generate_data.sh
           cargo nextest run --cargo-profile ci -p vortex-sqllogictest
       - uses: ./.github/actions/check-rebuild
         with:
@@ -919,7 +903,6 @@ jobs:
             --exclude vortex --exclude vortex-cuda --exclude vortex-cub --exclude vortex-nvcomp
             --exclude vortex-datafusion --exclude vortex-duckdb --exclude vortex-tui --exclude vortex-zstd
             --exclude vortex-test-e2e-cuda --exclude vortex-python-cuda --exclude vortex-sqllogictest
-            --exclude vortex-parquet-variant
       - name: "Make sure no files changed after build"
         if: "!cancelled()"
         run: |

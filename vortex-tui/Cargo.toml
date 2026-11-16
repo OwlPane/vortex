@@ -21,7 +21,6 @@ native = [
     "dep:datafusion",
     "dep:env_logger",
     "dep:indicatif",
-    "dep:parquet",
     "dep:tokio",
     "dep:vortex-datafusion",
     "ratatui/crossterm",
@@ -52,7 +51,6 @@ serde_json = { workspace = true }
 taffy = { workspace = true }
 vortex = { version = "0.1.0", path = "../vortex", default-features = false, features = [
     "files",
-    "parquet-variant",
     "wasm-bindgen",
 ] }
 vortex-arrow = { workspace = true }
@@ -65,7 +63,6 @@ crossterm = { workspace = true, features = ["event-stream"], optional = true }
 datafusion = { workspace = true, optional = true }
 env_logger = { workspace = true, optional = true }
 indicatif = { workspace = true, features = ["futures"], optional = true }
-parquet = { workspace = true, features = ["arrow", "async"], optional = true }
 tokio = { workspace = true, features = [
     "rt-multi-thread",
     "macros",

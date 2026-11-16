@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: Copyright the Vortex contributors
 
-mod clickbench;
 mod tpch;
 
 use crate::fixtures::DatasetFixture;
@@ -10,7 +9,6 @@ use crate::fixtures::DatasetFixture;
 pub fn fixtures() -> Vec<Box<dyn DatasetFixture>> {
     let mut fixtures = Vec::new();
     fixtures.extend(tpch::fixtures());
-    fixtures.extend(clickbench::fixtures());
     fixtures
 }
 
@@ -30,18 +28,11 @@ mod tests {
     use super::fixtures;
     use crate::adapter;
 
-    fn is_clickbench_fixture(name: &str) -> bool {
-        name.contains("clickbench")
-    }
-
     #[test]
-    fn roundtrip_non_clickbench_fixtures_to_bytes() -> VortexResult<()> {
+    fn roundtrip_dataset_fixtures_to_bytes() -> VortexResult<()> {
         let session = VortexSession::default();
         session.enable_edition(CORE_2026_08_3)?;
-        for dataset in fixtures()
-            .into_iter()
-            .filter(|fixture| !is_clickbench_fixture(fixture.name()))
-        {
+        for dataset in fixtures() {
             let array = dataset.build(&session.arrow())?;
             let regular_bytes = adapter::write_compressed_to_bytes_with_session(
                 &session,

@@ -5,7 +5,6 @@ A small, helpful CLI tool for exploring and analyzing Vortex files.
 * `browse`: Browse the structure of your Vortex file with a rich TUI
 * `tree`: Print the encoding tree of a Vortex file
 * `inspect`: Inspect Vortex file footer and metadata
-* `convert`: Convert a Parquet file to a Vortex file
 * `query`: Run a SQL query against a Vortex file and print JSON
 * `segments`: Print the segment layout of a Vortex file as JSON
 
@@ -14,7 +13,7 @@ A small, helpful CLI tool for exploring and analyzing Vortex files.
 Using the `tree` subcommand to print the encoding tree for a file:
 
 ```
-$ vx tree ./vortex-bench/data/tpch/1/vortex_compressed/nation.vortex
+$ vx tree ./nation.vortex
 
 root: vortex.struct(0x04)({n_nationkey=i64, n_name=utf8, n_regionkey=i64, n_comment=utf8?}, len=25) nbytes=3.04 kB (100.00%)
   metadata: StructMetadata { validity: NonNullable }
@@ -50,7 +49,7 @@ root: vortex.struct(0x04)({n_nationkey=i64, n_name=utf8, n_regionkey=i64, n_comm
 Opening an interactive TUI to browse the sample file:
 
 ```
-vx browse ./vortex-bench/data/tpch/1/vortex_compressed/nation.vortex
+vx browse ./nation.vortex
 ```
 
 ### Inspecting File Footer
@@ -95,18 +94,6 @@ Segment details:
   [0] offset=0, length=4096, alignment=8
   [1] offset=4096, length=8192, alignment=8
   ...
-```
-
-### Converting Files
-
-Convert a Parquet file to Vortex format:
-
-```bash
-# Basic conversion
-vx convert input.parquet --out output.vortex
-
-# With compression enabled
-vx convert input.parquet --out output.vortex --compress
 ```
 
 ## Browser (WASM)

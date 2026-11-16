@@ -92,7 +92,7 @@
 //! The byte-level format is specified in full at
 //! <https://docs.vortex.dev/specs/file-format.html>.
 //!
-//! A Parquet-style file is realized by nesting a chunked layout of struct layouts of chunked layouts
+//! A row-group/page style file is realized by nesting a chunked layout of struct layouts of chunked layouts
 //! of flat layouts: the outer chunked layout models row groups and the inner one models pages.
 //! Layouts are adaptive, so the writer is free to build arbitrarily complex layouts to trade off
 //! locality and parallelism, or to elide statistics entirely when an external index supplies them.

@@ -12,10 +12,6 @@ use datafusion::datasource::provider::DefaultTableFactory;
 use datafusion::execution::SessionStateBuilder;
 use datafusion::prelude::SessionConfig;
 use datafusion::prelude::SessionContext;
-use datafusion_sqllogictest::DataFusion;
-use datafusion_sqllogictest::df_value_validator;
-use datafusion_sqllogictest::value_normalizer;
-use indicatif::ProgressBar;
 use sqllogictest::Runner;
 use sqllogictest::harness::Arguments;
 use sqllogictest::harness::Failed;
@@ -27,6 +23,9 @@ use vortex::editions::EditionSessionExt;
 use vortex::session::VortexSession;
 use vortex_datafusion::VortexFormatFactory;
 use vortex_datafusion::VortexTableOptions;
+use vortex_sqllogictest::datafusion_engine::DataFusion;
+use vortex_sqllogictest::datafusion_engine::df_value_validator;
+use vortex_sqllogictest::datafusion_engine::value_normalizer;
 use vortex_sqllogictest::duckdb::DuckDB;
 use vortex_sqllogictest::duckdb::duckdb_validator;
 use vortex_sqllogictest::normalize::PathNormalizing;
@@ -92,7 +91,7 @@ fn drive_datafusion(path: &Path, work_dir: &Path, mode: Mode) -> anyhow::Result<
 
         let mut runner = Runner::new(|| async {
             Ok(PathNormalizing::new(
-                DataFusion::new(session.clone(), path.to_path_buf(), ProgressBar::hidden()),
+                DataFusion::new(session.clone()),
                 work_dir.clone(),
             ))
         });
@@ -170,32 +169,10 @@ fn engines_for(path: &Path) -> (bool, bool) {
     (datafusion, duckdb)
 }
 
-/// Suites whose tables come from a `generate_data.sh` script rather than the
-/// test itself: the `slt/` subdirectory holding the suite, and a file whose
-/// Vortex and Parquet versions both have to exist for the suite to run.
-const GENERATED_DATASETS: &[(&str, &str)] = &[
-    ("tpch", "tpch/data/lineitem"),
-    ("tpcds", "tpcds/data/store_sales"),
-    ("clickbench", "clickbench/data/hits"),
-];
-
-/// Whether `path` belongs to a generated-data suite whose data is absent.
-fn missing_generated_data(path: &Path) -> bool {
-    GENERATED_DATASETS.iter().any(|(dir, fixture)| {
-        path.components().any(|c| c.as_os_str() == *dir)
-            && !["vortex", "parquet"]
-                .into_iter()
-                .all(|format| SLT_ROOT.join(format!("{fixture}.{format}")).exists())
-    })
-}
-
 /// Rewrites the expected output of each file in place, completing from a single
 /// reference engine per file (DuckDB for `duckdb/` files, DataFusion otherwise).
 fn complete_files(args: &Arguments, files: &[PathBuf], slt_root: &Path) -> anyhow::Result<()> {
     for path in files {
-        if missing_generated_data(path) {
-            continue;
-        }
         let name = path
             .strip_prefix(slt_root)
             .unwrap_or(path)
@@ -248,10 +225,6 @@ fn main() -> anyhow::Result<ExitCode> {
     let mut trials = Vec::new();
     for path in files {
         let (run_datafusion, run_duckdb) = engines_for(&path);
-        // Generated-data trials (TPC-H, TPC-DS, ClickBench) are ignored (rather
-        // than removed) when the data is absent, so `--list` and the run summary
-        // still account for them.
-        let ignored = missing_generated_data(&path);
         let name = path
             .strip_prefix(SLT_ROOT.as_path())
             .unwrap_or(&path)
@@ -262,26 +235,19 @@ fn main() -> anyhow::Result<ExitCode> {
             let path = path.clone();
             let test_name = format!("slt::datafusion::{name}");
             let work_dir = work_dir_for(&test_name);
-            trials.push(
-                Trial::test(test_name, move || {
-                    drive_datafusion(&path, &work_dir, Mode::Run)
-                        .map_err(|e| Failed::from(e.to_string()))
-                })
-                .with_ignored_flag(ignored),
-            );
+            trials.push(Trial::test(test_name, move || {
+                drive_datafusion(&path, &work_dir, Mode::Run)
+                    .map_err(|e| Failed::from(e.to_string()))
+            }));
         }
 
         if run_duckdb {
             let path = path.clone();
             let test_name = format!("slt::duckdb::{name}");
             let work_dir = work_dir_for(&test_name);
-            trials.push(
-                Trial::test(test_name, move || {
-                    drive_duckdb(&path, &work_dir, Mode::Run)
-                        .map_err(|e| Failed::from(e.to_string()))
-                })
-                .with_ignored_flag(ignored),
-            );
+            trials.push(Trial::test(test_name, move || {
+                drive_duckdb(&path, &work_dir, Mode::Run).map_err(|e| Failed::from(e.to_string()))
+            }));
         }
     }
 

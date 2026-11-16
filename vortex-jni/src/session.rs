@@ -23,7 +23,6 @@ pub(crate) fn new_session() -> Box<VortexSession> {
     session
         .enable_edition(CORE_2026_08_3)
         .vortex_expect("JNI-supported draft core edition is registered");
-    vortex_parquet_variant::initialize(&session);
     vortex_spatial::initialize(&session);
     Box::new(session)
 }

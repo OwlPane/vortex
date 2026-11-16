@@ -1,13 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: Copyright the Vortex contributors
 
-import os.path
-from pathlib import Path
 
 import numpy as np
 import pyarrow as pa
-import pyarrow.parquet as pq
-import pytest
 
 import vortex
 
@@ -69,14 +65,3 @@ def test_table_encode() -> None:
         [pa.array([0, 1, 2, 3, 4, 5]), pa.array(["a", "b", "c", "d", "e", "f"], type=pa.string_view())],
         names=["number", "string"],
     )
-
-
-@pytest.mark.skip(reason="We have no way to guarantee that the vortex-bench data has been downloaded.")
-def test_taxi() -> None:
-    curdir = Path(os.path.dirname(__file__)).parent.parent
-    table = pq.read_table(curdir / "vortex-bench/data/yellow-tripdata-2023-11.parquet")
-    compressed = vortex.compress(vortex.array(table[:100]))
-    decompressed = compressed.to_arrow_array()
-    assert len(decompressed) == 100
-    # hard to test because of string_view
-    # assert pc.equal(decompressed, table[:100].to_struct_array()), (decompressed, table[:100].to_struct_array())

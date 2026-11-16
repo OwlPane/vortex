@@ -302,7 +302,7 @@ fn column_stats_from_summary(
         min: exact_scalar_to_duckdb(value(Min.bind(NumericalAggregateOpts::skip_nans())), dtype)?,
         max: exact_scalar_to_duckdb(value(Max.bind(NumericalAggregateOpts::skip_nans())), dtype)?,
         null_count: exact_u64(value(NullCount.bind(EmptyOptions))),
-        // NaNCount is exact only for float columns, so this is emitted just for them (as in parquet).
+        // NaNCount is exact only for float columns, so this is emitted just for them.
         has_nan: exact_u64(value(NanCount.bind(EmptyOptions))).map(|count| count > 0),
         num_values: summary.row_count(),
         // On-disk compressed size; excludes bytes not attributable to a column (e.g. struct validity).

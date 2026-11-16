@@ -643,7 +643,7 @@ fn try_push_projection_aggregate(
 ///
 /// See duckdb/src/optimizer/join_order/relation_statistics_helper.cpp
 ///
-/// As we don't report distinct values (same as Parquet), the only heuristic
+/// As we don't report distinct values, the only heuristic
 /// duckdb uses is a 0.2 filter if there is any non-optional filter. We mimic it
 /// here.
 const DEFAULT_SELECTIVITY: f64 = 0.2;

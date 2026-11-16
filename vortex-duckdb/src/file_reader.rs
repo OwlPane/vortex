@@ -186,7 +186,7 @@ pub fn reader_open(file_path: &str) -> VortexResult<OpenFileReader> {
 }
 
 /// Called once per scan with first file without locks. Populates "result"
-/// with first file schema which is the scan schema. Unlike Parquet, we don't
+/// with first file schema which is the scan schema. We don't
 /// support schema evolution, so if any file schema doesn't match first schema,
 /// we break.
 pub fn reader_bind(file: &OpenFileReader, result: &mut BindResultRef) -> VortexResult<BindState> {
@@ -465,7 +465,7 @@ pub fn reader_get_progress_in_file(file: &OpenFileReader) -> f64 {
 /// Called by one thread in planning phase
 pub fn can_get_partition_stats(bind: &BindState) -> bool {
     // Re-reading footers on every request is costly so we mimic DuckDB's
-    // TryLoadCaches for Parquet and load them once per file
+    // TryLoadCaches and load them once per file
     !bind.no_footer_caches
     // This function is called during planning where we haven't read data yet.
     // If there's a filter, we need to read the data to evaluate stats.

@@ -41,7 +41,7 @@ use crate::Json;
 /// fails to parse as JSON fails the whole expression.
 ///
 /// A non-empty [`ShreddingSpec`] additionally shreds the selected paths into a typed shredded
-/// child, following the [Parquet Variant shredding] rules: rows whose value does not match the
+/// child, following the standard Variant shredding rules: rows whose value does not match the
 /// requested type stay readable through the residual variant value.
 ///
 /// # Execution
@@ -63,8 +63,6 @@ use crate::Json;
 ///   exponent forms and very large numbers are re-encoded).
 /// - Duplicate object keys are collapsed to a single entry.
 /// - Unicode escape sequences are normalized (e.g. `A` becomes `A`).
-///
-/// [Parquet Variant shredding]: https://github.com/apache/parquet-format/blob/master/VariantShredding.md
 #[derive(Clone)]
 pub struct JsonToVariant;
 
@@ -219,7 +217,7 @@ pub fn json_to_variant(child: Expression, shredding: ShreddingSpec) -> Expressio
 /// type.
 ///
 /// Paths must contain only object-field elements; list index elements are rejected because
-/// Parquet Variant shredding schemas cannot express list element shredding yet. The root path
+/// Variant shredding schemas cannot express list element shredding yet. The root path
 /// (`$`) shreds the top-level value itself. When entries overlap (e.g. `$.a` and `$.a.b`),
 /// later entries overwrite earlier ones.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]

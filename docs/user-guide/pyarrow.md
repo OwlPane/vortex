@@ -5,15 +5,15 @@ batch readers.
 
 ## Writing Vortex Files
 
-Use {func}`~vortex.io.write` to convert a Parquet file to Vortex. The write function accepts
+Use {func}`~vortex.io.write` to convert Arrow data to Vortex. The write function accepts
 anything that implements `IntoArrayIterator`, including {class}`pyarrow.Table` and
 {class}`pyarrow.RecordBatchReader`:
 
 ```{doctest} pycon
->>> import pyarrow.parquet as pq
+>>> import pyarrow.feather as feather
 >>> import vortex as vx
 >>>
->>> table = pq.read_table("_static/example.parquet")
+>>> table = feather.read_table("_static/example.arrow")
 >>> vx.io.write(table, 'example.vortex')
 ```
 

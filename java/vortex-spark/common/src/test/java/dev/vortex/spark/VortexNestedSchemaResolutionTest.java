@@ -43,10 +43,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Tests that nested fields of a supplied schema resolve against each file by name, the way Parquet resolves them.
+ * Tests that nested fields of a supplied schema resolve against each file by name, the way ORC resolves them.
  *
  * <p>Every file holds {@code id} and {@code s = {a, b, t: {a, b}}}, with {@code s} null in one row and {@code s.t} in
- * another. Each query reads the same rows from Parquet and Vortex with the same supplied schema, with nested schema
+ * another. Each query reads the same rows from ORC and Vortex with the same supplied schema, with nested schema
  * pruning on and off. The tests of columns Spark cannot read write their own files through the native writer.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -55,7 +55,7 @@ public final class VortexNestedSchemaResolutionTest {
     private static final String CASE_SENSITIVE = "spark.sql.caseSensitive";
 
     private SparkSession spark;
-    private String parquetPath;
+    private String orcPath;
     private String vortexPath;
 
     @BeforeAll
@@ -73,9 +73,9 @@ public final class VortexNestedSchemaResolutionTest {
                         "id",
                         "IF(id = 1, NULL, named_struct('a', id + 10, 'b', id + 20, 't', IF(id = 2, NULL,"
                                 + " named_struct('a', id + 30, 'b', id + 40)))) AS s");
-        parquetPath = tempDir.resolve("parquet").toString();
+        orcPath = tempDir.resolve("orc").toString();
         vortexPath = tempDir.resolve("vortex").toString();
-        rows.write().parquet(parquetPath);
+        rows.write().orc(orcPath);
         rows.write().format("vortex").save(vortexPath);
     }
 
@@ -98,10 +98,10 @@ public final class VortexNestedSchemaResolutionTest {
     public void fieldInAnotherCase(boolean caseSensitive) {
         spark.conf().set(CASE_SENSITIVE, caseSensitive);
         String schema = "id BIGINT, s STRUCT<A: BIGINT, B: BIGINT, t: STRUCT<a: BIGINT, b: BIGINT>>";
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.B"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.B", "s.t.a"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s"));
-        assertMatchesParquet(schema, data -> data.where("s.B > 20").selectExpr("id", "s.t.b"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.B"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.B", "s.t.a"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s"));
+        assertMatchesOrc(schema, data -> data.where("s.B > 20").selectExpr("id", "s.t.b"));
     }
 
     @ParameterizedTest(name = "caseSensitive={0}")
@@ -110,16 +110,16 @@ public final class VortexNestedSchemaResolutionTest {
     public void nestedFieldInAnotherCase(boolean caseSensitive) {
         spark.conf().set(CASE_SENSITIVE, caseSensitive);
         String schema = "id BIGINT, s STRUCT<a: BIGINT, b: BIGINT, t: STRUCT<A: BIGINT, B: BIGINT>>";
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.t.B"));
-        assertMatchesParquet(schema, data -> data.where("s.t.B > 40").selectExpr("id", "s.a"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.t.B"));
+        assertMatchesOrc(schema, data -> data.where("s.t.B > 40").selectExpr("id", "s.a"));
         if (caseSensitive) {
-            // `t` keeps its nulls with none of its read fields in the file. Parquet does too from Spark 4.1.
+            // `t` keeps its nulls with none of its read fields in the file.
             assertRows(
                     schema,
                     data -> data.selectExpr("id", "s.a", "s.t"),
                     "[[0,10,[null,null]], [1,null,null], [2,12,null], [3,13,[null,null]]]");
         } else {
-            assertMatchesParquet(schema, data -> data.selectExpr("id", "s.a", "s.t"));
+            assertMatchesOrc(schema, data -> data.selectExpr("id", "s.a", "s.t"));
         }
     }
 
@@ -127,18 +127,18 @@ public final class VortexNestedSchemaResolutionTest {
     @DisplayName("A supplied struct with fewer fields than the file reads them by name")
     public void narrowerStruct() {
         String schema = "id BIGINT, s STRUCT<b: BIGINT, t: STRUCT<b: BIGINT>>";
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.b"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.t.b"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.b"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.t.b"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s"));
     }
 
     @Test
     @DisplayName("A supplied struct with its fields in another order reads them by name")
     public void reorderedStruct() {
         String schema = "id BIGINT, s STRUCT<t: STRUCT<b: BIGINT, a: BIGINT>, b: BIGINT, a: BIGINT>";
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.b"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.t.b", "s.a"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.b"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.t.b", "s.a"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s"));
     }
 
     @Test
@@ -146,24 +146,24 @@ public final class VortexNestedSchemaResolutionTest {
     public void absentField() {
         String schema = "id BIGINT, s STRUCT<a: BIGINT, b: BIGINT, t: STRUCT<a: BIGINT, b: BIGINT, c: BIGINT>,"
                 + " c: BIGINT, u: STRUCT<x: BIGINT>>";
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.c"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.t.c", "s.t.a"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s.u.x", "s.u IS NULL", "s.b"));
-        assertMatchesParquet(schema, data -> data.selectExpr("id", "s"));
-        assertMatchesParquet(
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.c"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.t.c", "s.t.a"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s.u.x", "s.u IS NULL", "s.b"));
+        assertMatchesOrc(schema, data -> data.selectExpr("id", "s"));
+        assertMatchesOrc(
                 schema, data -> data.where("s.c IS NULL AND s.t.c IS NULL").selectExpr("id", "s.a"));
     }
 
     @Test
     @DisplayName("Files whose structs differ in field order and in fields read by name in one query")
     public void filesWithDifferentStructs(@TempDir Path tempDir) {
-        String parquet = tempDir.resolve("parquet").toString();
+        String orc = tempDir.resolve("orc").toString();
         String vortex = tempDir.resolve("vortex").toString();
         Dataset<Row> first = spark.range(0, 2).selectExpr("id", "named_struct('x', id + 10, 'y', id + 20) AS c");
         Dataset<Row> second = spark.range(2, 4)
                 .selectExpr("id", "IF(id = 3, NULL, named_struct('y', id + 20, 'z', id + 30, 'x', id + 10)) AS c");
         for (Dataset<Row> rows : List.of(first, second)) {
-            rows.write().mode("append").parquet(parquet);
+            rows.write().mode("append").orc(orc);
             rows.write().mode("append").format("vortex").save(vortex);
         }
 
@@ -173,10 +173,10 @@ public final class VortexNestedSchemaResolutionTest {
                 schema,
                 data -> data.selectExpr("id", "c"),
                 "[[0,[10,20,null]], [1,[11,21,null]], [2,[12,22,32]], [3,null]]");
-        assertMatchesParquet(parquet, vortex, schema, data -> data.selectExpr("id", "c"));
-        assertMatchesParquet(parquet, vortex, schema, data -> data.selectExpr("id", "c.y", "c.z"));
-        assertMatchesParquet(
-                parquet, vortex, schema, data -> data.where("c.x > 10").selectExpr("id", "c.y"));
+        assertMatchesOrc(orc, vortex, schema, data -> data.selectExpr("id", "c"));
+        assertMatchesOrc(orc, vortex, schema, data -> data.selectExpr("id", "c.y", "c.z"));
+        assertMatchesOrc(
+                orc, vortex, schema, data -> data.where("c.x > 10").selectExpr("id", "c.y"));
     }
 
     @Test
@@ -283,16 +283,16 @@ public final class VortexNestedSchemaResolutionTest {
         }
     }
 
-    /** Asserts that {@code query} returns the same rows from Vortex as from Parquet, with pruning off and on. */
-    private void assertMatchesParquet(String schema, Function<Dataset<Row>, Dataset<Row>> query) {
-        assertMatchesParquet(parquetPath, vortexPath, schema, query);
+    /** Asserts that {@code query} returns the same rows from Vortex as from ORC, with pruning off and on. */
+    private void assertMatchesOrc(String schema, Function<Dataset<Row>, Dataset<Row>> query) {
+        assertMatchesOrc(orcPath, vortexPath, schema, query);
     }
 
-    private void assertMatchesParquet(
-            String parquet, String vortex, String schema, Function<Dataset<Row>, Dataset<Row>> query) {
+    private void assertMatchesOrc(
+            String orc, String vortex, String schema, Function<Dataset<Row>, Dataset<Row>> query) {
         for (boolean pruning : new boolean[] {false, true}) {
             spark.conf().set(PRUNING, pruning);
-            List<Row> expected = query.apply(spark.read().schema(schema).parquet(parquet))
+            List<Row> expected = query.apply(spark.read().schema(schema).orc(orc))
                     .orderBy("id")
                     .collectAsList();
             List<Row> actual = query.apply(

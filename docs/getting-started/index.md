@@ -1,7 +1,7 @@
 # Quickstart
 
 The fastest way to try Vortex is with the `vx` command-line tool. In three steps you can
-convert a Parquet file, explore its structure, and run SQL queries — all from the terminal.
+create a Vortex file, explore its structure, and run SQL queries — all from the terminal.
 
 ```{toctree}
 ---

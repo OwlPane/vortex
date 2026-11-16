@@ -45,12 +45,12 @@ else
     extra=""
     if [ "$PLATFORM_OS" = "osx" ]; then
         extra="OSX_BUILD_UNIVERSAL=1"
-        extensions="parquet;tpch;tpcds;icu"
+        extensions="tpch;tpcds;icu"
     else
         make -C "$src_dir" setup-vcpkg
         VCPKG_TOOLCHAIN_PATH="$PWD/${src_dir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
         export VCPKG_TOOLCHAIN_PATH
-        extensions="parquet;tpch;tpcds;icu;httpfs"
+        extensions="tpch;tpcds;icu;httpfs"
     fi
 
     make -C "$src_dir" \

@@ -24,16 +24,16 @@ As with arrays, Vortex provides a number of built-in layouts, and users can defi
 | `ZonedLayout`      | A layout that stores a zone-map of statistics to perform filter pruning.                                |
 
 
-### Example: Parquet Row Groups
+### Example: Row Groups
 
 Layouts can be composed together in arbitrary hierarchical structures. This allows users of Vortex to configure 
 writers that model the performance characteristics of other file formats or storage systems.
 
-As an example, suppose we want to replicate the behavior of Parquet row groups in Vortex. We would define a layout that
+As an example, suppose we want to replicate the behavior of row groups in a row-group oriented format. We would define a layout that
 looked something like:
 
 * `ChunkedLayout(ChunkBy::RowCount(100_000))` - at the top-level, we define row-groups of at most 100k rows.
-    * `StructLayout` - Parquet then splits the row group into individual columns known as column chunks.
+    * `StructLayout` - the row group is then split into individual columns known as column chunks.
         * `ChunkedLayout(ChunkBy::CompressedSize(64k))` - finally, each column chunk is split into pages by compressed
           size.
 

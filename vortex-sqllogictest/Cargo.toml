@@ -13,9 +13,14 @@ version = { workspace = true }
 
 [dependencies]
 anyhow = { workspace = true }
+arrow-array = { workspace = true }
+arrow-cast = { workspace = true }
+arrow-schema = { workspace = true }
 async-trait = { workspace = true }
 bigdecimal = { workspace = true }
-datafusion-sqllogictest = { workspace = true }
+datafusion = { workspace = true }
+half = { workspace = true }
+itertools = { workspace = true }
 regex = { workspace = true }
 rstest = { workspace = true }
 sqllogictest = "0.29.1"
@@ -25,10 +30,8 @@ vortex = { workspace = true, features = ["tokio"] }
 vortex-duckdb = { workspace = true, features = ["static-extensions"] }
 
 [dev-dependencies]
-datafusion = { workspace = true, features = ["parquet"] }
 datafusion-functions-nested.workspace = true
 futures = { workspace = true }
-indicatif = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 vortex-datafusion = { workspace = true }
 

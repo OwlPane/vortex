@@ -848,7 +848,7 @@ fn map_compression_preserves_repeated_entry_children() -> VortexResult<()> {
 }
 
 /// Distinct 27-byte strings whose views reference a small prefix of one 2 MiB buffer, the way
-/// Arrow's Parquet reader shares a decompressed page between batches.
+/// a columnar file reader shares a decompressed page between batches.
 fn views_into_shared_page(rows: u32) -> ArrayRef {
     const VALUE_LEN: u32 = 27;
     let mut page = vec![0u8; 2 << 20];

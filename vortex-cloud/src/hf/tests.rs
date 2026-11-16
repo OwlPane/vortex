@@ -66,10 +66,10 @@ fn parse(url: &str) -> Result<(HfConfig, String), Box<dyn std::error::Error>> {
 )]
 // A revision containing `/` arrives percent-encoded and must be held decoded.
 #[case(
-    "hf://datasets/org/name@refs%2Fconvert%2Fparquet/data/train.vortex",
+    "hf://datasets/org/name@refs%2Fpr%2F1/data/train.vortex",
     HfRepoType::Dataset,
     "org/name",
-    "refs/convert/parquet",
+    "refs/pr/1",
     "data/train.vortex"
 )]
 // A bare owner/name is a model repository: the owner is the URL authority.
@@ -156,8 +156,8 @@ fn test_url_to_config_rejects_other_schemes() -> Result<(), Box<dyn std::error::
 // The Hub only routes the escaped form of a revision containing `/`.
 #[case(
     HfRepoType::Dataset,
-    "refs/convert/parquet",
-    "https://huggingface.co/datasets/org/name/resolve/refs%2Fconvert%2Fparquet"
+    "refs/pr/1",
+    "https://huggingface.co/datasets/org/name/resolve/refs%2Fpr%2F1"
 )]
 fn test_resolve_prefix(
     #[case] repo_type: HfRepoType,
@@ -175,16 +175,15 @@ fn test_resolve_prefix(
 }
 
 /// A percent-encoded revision must survive the URL -> config -> URL round trip, since that is how a
-/// `refs/convert/parquet` read reaches the Hub.
+/// `refs/pr/1` read reaches the Hub.
 #[test]
 fn test_slash_revision_round_trips() -> Result<(), Box<dyn std::error::Error>> {
-    let (config, path) =
-        parse("hf://datasets/org/name@refs%2Fconvert%2Fparquet/data/train.vortex")?;
+    let (config, path) = parse("hf://datasets/org/name@refs%2Fpr%2F1/data/train.vortex")?;
 
-    assert_eq!(config.revision, "refs/convert/parquet");
+    assert_eq!(config.revision, "refs/pr/1");
     assert_eq!(
         config.resolve_prefix(),
-        "https://huggingface.co/datasets/org/name/resolve/refs%2Fconvert%2Fparquet"
+        "https://huggingface.co/datasets/org/name/resolve/refs%2Fpr%2F1"
     );
     assert_eq!(path, "data/train.vortex");
     Ok(())

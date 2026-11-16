@@ -96,8 +96,8 @@ final class VortexScanBuilder(
     })
   }
 
-  /** Escape hatch matching `spark.sql.parquet.aggregatePushdown`, for when a
-    * footer count must not be trusted.
+  /** Escape hatch for disabling aggregate pushdown, for when a footer count
+    * must not be trusted.
     */
   private def aggregatePushdownEnabled: Boolean =
     options.getBoolean(VortexScanBuilder.AggregatePushdownOption, true)

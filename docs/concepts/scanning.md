@@ -14,7 +14,7 @@ interface that both sides can implement against.
     ───────                                  ─────────────
 
     Vortex Files   ──► ┌──────────────┐ ──►  DuckDB
-    Parquet Files  ──► │   Scan API   │ ──►  DataFusion
+    Arrow Data     ──► │   Scan API   │ ──►  DataFusion
     Iceberg Tables ──► └──────────────┘ ──►  Spark
 ```
 

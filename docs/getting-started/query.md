@@ -5,7 +5,7 @@
 Open the converted taxi data in the interactive TUI:
 
 ```bash
-vx browse yellow_tripdata_2024-01.vortex
+vx browse example.vortex
 ```
 
 The browser has three tabs (cycle with `Tab`):
@@ -42,13 +42,13 @@ View the file structure without the full TUI:
 
 ```bash
 # Show the encoding tree
-vx tree layout yellow_tripdata_2024-01.vortex
+vx tree layout example.vortex
 
 # Show detailed segment layout
-vx segments yellow_tripdata_2024-01.vortex
+vx segments example.vortex
 
 # Inspect file metadata (EOF marker, postscript, footer)
-vx inspect yellow_tripdata_2024-01.vortex
+vx inspect example.vortex
 ```
 
 `vx inspect` and `vx tree layout` take `--json` for machine-readable output; `vx segments` always
@@ -59,7 +59,7 @@ emits JSON.
 For non-interactive use, the `vx query` command runs a SQL query and outputs JSON:
 
 ```bash
-vx query yellow_tripdata_2024-01.vortex \
+vx query example.vortex \
     --sql "SELECT COUNT(*) as num_trips, ROUND(SUM(total_amount), 2) as total_revenue FROM data"
 ```
 

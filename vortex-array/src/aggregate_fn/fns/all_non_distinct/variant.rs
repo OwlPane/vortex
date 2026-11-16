@@ -11,7 +11,7 @@ use crate::arrays::VariantArray;
 /// Variant values cannot be routed back through [`all_non_distinct`]: canonicalizing a variant
 /// value array yields another canonical variant (with no shredded tree), which would recurse
 /// forever. The generic fallback therefore compares logical variant scalars row-by-row. Encodings
-/// that can compare their typed/value children more cheaply (e.g. `ParquetVariant`) register an
+/// that can compare their typed/value children more cheaply register an
 /// aggregate kernel that intercepts the comparison before it reaches this fallback.
 ///
 /// [`all_non_distinct`]: super::all_non_distinct

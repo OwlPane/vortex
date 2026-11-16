@@ -119,7 +119,6 @@ that is the form that the published file holds.
 | Chunked | `chunked.vortex` | 3 chunks of 1000 rows, deterministic values |
 | TPC-H Lineitem | `tpch_lineitem.vortex` | TPC-H lineitem at SF 0.01 |
 | TPC-H Orders | `tpch_orders.vortex` | TPC-H orders at SF 0.01 |
-| ClickBench Hits | `clickbench_hits_1k.vortex` | First 1000 rows of ClickBench hits |
 
 ### Adding a new fixture
 

@@ -34,8 +34,6 @@ pub mod browse;
 pub mod segment_tree;
 
 #[cfg(feature = "native")]
-pub mod convert;
-#[cfg(feature = "native")]
 pub mod datafusion_helper;
 #[cfg(feature = "native")]
 pub mod inspect;
@@ -70,8 +68,6 @@ mod native_cli {
     enum Commands {
         /// Print tree views of a Vortex file (layout tree or array tree)
         Tree(super::tree::TreeArgs),
-        /// Convert a Parquet file to a Vortex file. Chunking occurs on Parquet RowGroup boundaries.
-        Convert(#[command(flatten)] super::convert::ConvertArgs),
         /// Interactively browse the Vortex file.
         Browse { file: PathBuf },
         /// Inspect Vortex file footer and metadata
@@ -90,7 +86,6 @@ mod native_cli {
                     super::tree::TreeMode::Layout { file, .. } => file,
                 },
                 Commands::Browse { file } => file,
-                Commands::Convert(flags) => &flags.file,
                 Commands::Inspect(args) => &args.file,
                 Commands::Query(args) => &args.file,
                 Commands::Segments(args) => &args.file,
@@ -144,7 +139,6 @@ mod native_cli {
 
         match cli.command {
             Commands::Tree(args) => super::tree::exec_tree(session, args).await?,
-            Commands::Convert(flags) => super::convert::exec_convert(session, flags).await?,
             Commands::Browse { file } => super::browse::exec_tui(session, file).await?,
             Commands::Inspect(args) => super::inspect::exec_inspect(session, args).await?,
             Commands::Query(args) => super::query::exec_query(session, args).await?,

@@ -99,7 +99,7 @@ def test_empty_file(tmpdir_factory) -> None:
 
 
 def test_stream_pyarrow(tmpdir_factory) -> None:
-    import pyarrow.parquet as pq
+    import pyarrow.feather as feather
 
     data_dir = tmpdir_factory.mktemp("data")
     table = pa.Table.from_pydict(
@@ -108,9 +108,9 @@ def test_stream_pyarrow(tmpdir_factory) -> None:
             "ages": [21, 22, 23],
         }
     )
-    pq.write_table(table, str(data_dir / "names.parquet"))
+    feather.write_feather(table, str(data_dir / "names.arrow"))
 
-    df = pq.read_table(str(data_dir / "names.parquet"))
+    df = feather.read_table(str(data_dir / "names.arrow"))
     vx.io.write(df, str(data_dir / "names.vortex"))
     assert vx.open(str(data_dir / "names.vortex")).to_arrow(schema=table.schema).read_all().equals(table)
 

@@ -134,7 +134,7 @@ impl FileSink for VortexSink {
             })?;
 
         // TODO(adamg):
-        // 1. We can probably be better at signaling how much memory we're consuming (potentially when reading too), see ParquetSink::spawn_writer_tasks_and_join.
+        // 1. We can probably be better at signaling how much memory we're consuming (potentially when reading too).
         while let Some((path, rx)) = file_stream_rx.recv().await {
             let session = self.session.clone();
             let object_store = Arc::clone(&object_store);

@@ -39,11 +39,9 @@ pub(super) type Block = [u32; SPLITS_PER_BLOCK];
 
 /// Eight odd constants for multiply-shift hashing.
 ///
-/// They fit in one 256-bit SIMD vector, and the order matches the one
-/// used by the Apache Parquet specification. The paper's example uses
-/// the same values but in a different order. This was not
-/// intentional for having compatibility with Apache Parquet, but remains
-/// as a common-order in implementations.
+/// They fit in one 256-bit SIMD vector, and the order is the one common
+/// to split-block bloom filter implementations. The paper's example uses
+/// the same values but in a different order.
 ///
 /// It is important to notice that while order doesn't affect validity,
 /// it changes the final bits set in each split/lane.

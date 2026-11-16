@@ -42,7 +42,7 @@ stdout (`check` only).
 Three phases:
 
 1. **Setup** — run each fixture's `setup()` concurrently via
-   `tokio::spawn_blocking`. Used by TPC-H and ClickBench fixtures to
+   `tokio::spawn_blocking`. Used by the TPC-H fixtures to
    download external data.
 2. **Build** — construct arrays in parallel threads via `std::thread::scope`.
    All must succeed before any files are written.

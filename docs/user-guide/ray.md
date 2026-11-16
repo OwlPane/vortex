@@ -7,11 +7,11 @@ and then run `make -C docs doctest` -->
 
 ```{doctest} pycon
 >>> import vortex as vx
->>> import pyarrow.parquet as pq
+>>> import pyarrow.feather as feather
 >>> import os
 >>>
 >>> os.makedirs("ray_data", exist_ok=True)
->>> table = pq.read_table("_static/example.parquet")
+>>> table = feather.read_table("_static/example.arrow")
 >>>
 >>> vx.io.write(table, 'ray_data/example-01.vortex')
 >>> vx.io.write(table, 'ray_data/example-02.vortex')
