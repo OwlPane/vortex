@@ -336,27 +336,7 @@ impl ArrowSession {
                 vortex_bail!("extension type cannot be converted to Arrow without a plugin: {ext}");
             }
             DType::Variant(_) => {
-                // TODO(Adam): This currently encodes information about parquet-variant
-                // at this level. Variant's complexity with being an essentially logical type
-                // with multiple physical layout complicates handling this correctly.
-                Ok(Field::new(
-                    name,
-                    DataType::Struct(
-                        vec![
-                            Field::new("metadata", DataType::BinaryView, dtype.is_nullable()),
-                            Field::new("value", DataType::BinaryView, dtype.is_nullable()),
-                        ]
-                        .into(),
-                    ),
-                    dtype.is_nullable(),
-                )
-                .with_metadata(
-                    [(
-                        EXTENSION_TYPE_NAME_KEY.to_string(),
-                        "arrow.parquet.variant".to_string(),
-                    )]
-                    .into(),
-                ))
+                vortex_bail!("Variant has no Arrow representation in this build: {dtype}")
             }
             _ => Ok(Field::new(
                 name,
@@ -393,8 +373,7 @@ impl ArrowSession {
     ///
     /// Plugins registered against the field's Arrow extension name are tried in
     /// registration order; the first plugin to return `Some(dtype)` wins. If none
-    /// match (or all return `None`), the builtin `arrow.parquet.variant` extension maps
-    /// to [`DType::Variant`], and any other field converts through
+    /// match (or all return `None`), the field converts through
     /// [`Self::from_arrow_datatype`] so extension metadata on nested element/struct
     /// fields is preserved.
     #[expect(clippy::disallowed_methods, reason = "interning a dynamic id")]
@@ -404,10 +383,6 @@ impl ArrowSession {
                 if let Some(dtype) = plugin.from_arrow_field(field, self)? {
                     return Ok(dtype);
                 }
-            }
-            // Parquet Variant is understood even without a registered importer plugin.
-            if name == "arrow.parquet.variant" {
-                return Ok(DType::Variant(field.is_nullable().into()));
             }
         }
         if let DataType::Dictionary(_, value_type) = field.data_type() {
@@ -1044,30 +1019,6 @@ mod tests {
         assert_eq!(
             schema_dtype,
             DType::Struct(struct_fields, Nullability::NonNullable)
-        );
-        Ok(())
-    }
-
-    #[test]
-    fn from_arrow_field_maps_variant_without_importer() -> VortexResult<()> {
-        let session = ArrowSession::default();
-        let storage = DataType::Struct(
-            vec![
-                Field::new("metadata", DataType::BinaryView, false),
-                Field::new("value", DataType::BinaryView, true),
-            ]
-            .into(),
-        );
-        let field = Field::new("v", storage, true).with_metadata(
-            [(
-                "ARROW:extension:name".to_string(),
-                "arrow.parquet.variant".to_string(),
-            )]
-            .into(),
-        );
-        assert_eq!(
-            session.from_arrow_field(&field)?,
-            DType::Variant(Nullability::Nullable)
         );
         Ok(())
     }

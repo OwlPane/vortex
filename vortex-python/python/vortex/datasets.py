@@ -83,7 +83,7 @@ def load_dataset(
     ``path`` may be a local path or glob, a URL readable by Vortex (``https://``, ``s3://``,
     ``gs://``, ``az://``), a Hugging Face Hub dataset repository id, or an ``hf://`` URI of the
     form ``hf://datasets/<org>/<name>[@<revision>][/<path-or-glob>]`` (percent-encode revisions
-    containing ``/``, e.g. ``@refs%2Fconvert%2Fparquet``).
+    containing ``/``, e.g. ``@refs%2Fpr%2F1``).
 
     Unlike ``datasets.load_dataset``, this defaults to ``streaming=True``. The streaming path
     keeps Vortex in charge of reading and pushes column selection, Vortex expressions, and row
@@ -718,7 +718,7 @@ def _parse_hf_uri(uri: str) -> tuple[str, str | None, str | None]:
     """Parse ``hf://datasets/<org>/<name>[@<revision>][/<path-or-glob>]``.
 
     Returns ``(repo_id, revision, path)`` with ``revision``/``path`` as ``None`` when absent.
-    A revision containing ``/`` (e.g. ``refs/convert/parquet``) must be percent-encoded, as in
+    A revision containing ``/`` (e.g. ``refs/pr/1``) must be percent-encoded, as in
     ``HfFileSystem`` paths.
     """
     rest = uri.removeprefix("hf://")

@@ -22,5 +22,4 @@ comment:
 # ignore example binaries
 ignore:
   - "**/examples/*.rs"
-  - "vortex-bench/**/*.rs"
   - "benchmarks/**/*.rs"

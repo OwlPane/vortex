@@ -475,7 +475,7 @@ const PATH_FILES: &[&str] = &[
     "Dockerfile",
     "schema.sql",
     "app.log",
-    "data.parquet",
+    "data.feather",
     "model.onnx",
     "README.md",
     "package.json",

@@ -8,7 +8,6 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use bigdecimal::BigDecimal;
-use datafusion_sqllogictest::DFColumnType;
 use regex::RegexBuilder;
 use sqllogictest::DBOutput;
 use sqllogictest::Normalizer;
@@ -22,6 +21,8 @@ use vortex_duckdb::duckdb::LogicalType;
 use vortex_duckdb::duckdb::LogicalTypeRef;
 use vortex_duckdb::duckdb::Value;
 use vortex_duckdb::initialize;
+
+use crate::datafusion_engine::DFColumnType;
 
 #[derive(Debug, thiserror::Error)]
 pub enum DuckDBTestError {
@@ -241,7 +242,7 @@ impl AsyncDB for DuckDB {
 }
 
 /// Rounds a floating-point value via BigDecimal to 12 decimal places,
-/// matching the behavior of `big_decimal_to_str` from `datafusion_sqllogictest`.
+/// matching the DataFusion engine in [`crate::datafusion_engine`].
 fn big_decimal_to_str(value: BigDecimal) -> String {
     value.round(12).normalized().to_plain_string()
 }
@@ -292,7 +293,7 @@ fn varchar_to_str(value: &str) -> String {
 }
 
 /// Adapter type to control how duckdb values are displayed.
-/// Matches the behavior of `cell_to_string` from `datafusion_sqllogictest`.
+/// Matches the cell formatting of [`crate::datafusion_engine`].
 struct ValueDisplayAdapter(Value);
 
 impl std::fmt::Display for ValueDisplayAdapter {
@@ -335,7 +336,6 @@ impl std::fmt::Display for ValueDisplayAdapter {
 
 #[cfg(test)]
 mod tests {
-    use datafusion_sqllogictest::DFColumnType;
     use rstest::rstest;
     use vortex_duckdb::duckdb::LogicalType;
     use vortex_duckdb::duckdb::Value;
@@ -344,6 +344,7 @@ mod tests {
     use super::ValueDisplayAdapter;
     use super::duckdb_validator;
     use super::try_regex_match;
+    use crate::datafusion_engine::DFColumnType;
 
     fn display(value: Value) -> String {
         ValueDisplayAdapter(value).to_string()

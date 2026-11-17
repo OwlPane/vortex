@@ -20,7 +20,7 @@ Vortex is a next-generation columnar file format and toolkit designed for high-p
 It is the fastest and most extensible format for building data systems backed by object storage. It provides:
 
 - **Blazing Fast Performance**
-  - 100x faster random access reads (vs. modern Apache Parquet)
+  - 100x faster random access reads
   - 10-20x faster scans
   - 5x faster writes
   - Similar compression ratios
@@ -130,23 +130,6 @@ documentation development, including Maturin rebuilds, targeted tests, and docum
 stable release. Building Vortex as a dependency only requires a toolchain that satisfies the
 [Rust version compatibility policy](#rust-version-compatibility-policy).
 
-### Benchmarking
-
-Use `vx-bench` to run benchmarks comparing engines (DataFusion, DuckDB) and formats (Parquet, Vortex):
-
-```bash
-# Install the benchmark orchestrator
-uv tool install "bench_orchestrator @ ./bench-orchestrator/"
-
-# Run TPC-H benchmarks
-vx-bench run tpch --engine datafusion,duckdb --format parquet,vortex
-
-# Compare results
-vx-bench compare --run latest
-```
-
-See [bench-orchestrator/README.md](bench-orchestrator/README.md) for full documentation.
-
 ### Performance Optimization
 
 For optimal performance, we suggest using [MiMalloc](https://github.com/microsoft/mimalloc):
@@ -242,7 +225,6 @@ The Vortex project benefits enormously from groundbreaking work from the academi
 
 - [Apache Arrow](https://arrow.apache.org)
 - [Apache DataFusion](https://github.com/apache/datafusion)
-- [parquet2](https://github.com/jorgecarleitao/parquet2) by Jorge Leitao
 - [DuckDB](https://github.com/duckdb/duckdb)
 - [Velox](https://github.com/facebookincubator/velox) & [Nimble](https://github.com/facebookincubator/nimble)
 

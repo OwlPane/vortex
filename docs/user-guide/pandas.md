@@ -9,9 +9,9 @@ convert:
 
 ```{doctest} pycon
 >>> import vortex as vx
->>> import pyarrow.parquet as pq
+>>> import pyarrow.feather as feather
 >>>
->>> vx.io.write(pq.read_table("_static/example.parquet"), 'example.vortex')
+>>> vx.io.write(feather.read_table("_static/example.arrow"), 'example.vortex')
 >>>
 >>> f = vx.open('example.vortex')
 >>> df = f.scan().read_all().to_pandas()

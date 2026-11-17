@@ -154,7 +154,7 @@ impl ObjectStoreRegistry for Registry {
         //    key — which is what keeps every scheme on the one caching rule in
         //    `cache_and_resolve`. The depth is then the difference in segment counts.
         let (store, path) = self.build_store(to_resolve)?;
-        // The raw URL path counts a percent-encoded segment (e.g. `refs%2Fconvert%2Fparquet`)
+        // The raw URL path counts a percent-encoded segment (e.g. `refs%2Fpr%2F1`)
         // as one segment while `path` is percent-decoded and may count more, so saturate to
         // mount the store at the URL root rather than underflowing.
         let depth = num_segments(to_resolve.path()).saturating_sub(num_segments(path.as_ref()));
@@ -266,7 +266,7 @@ fn num_segments(s: &str) -> usize {
 /// Returns the path of `url` skipping the first `depth` segments
 fn path_suffix(url: &Url, depth: usize) -> Result<Path, object_store::Error> {
     // The segments come from a URL, so percent-decode them (one raw segment may decode to
-    // several path parts, e.g. `refs%2Fconvert%2Fparquet`).
+    // several path parts, e.g. `refs%2Fpr%2F1`).
     let suffix = path_segments(url.path())
         .skip(depth)
         .collect::<Vec<_>>()

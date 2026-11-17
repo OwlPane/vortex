@@ -87,4 +87,3 @@ Query engine integrations allow Vortex files to be queried through existing anal
 | -------------- | ------------------------------------------------------ |
 | `vortex-cuda`  | GPU-accelerated decompression and compute (Linux only) |
 | `vortex-tui`   | Terminal UI for inspecting Vortex files                |
-| `vortex-bench` | Benchmark harness and data generators                  |

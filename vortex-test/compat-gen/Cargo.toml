@@ -33,17 +33,9 @@ arrow-array = { workspace = true }
 tpchgen = { workspace = true }
 tpchgen-arrow = { workspace = true }
 
-# ClickBench parquet reading + writing
-arrow-select = { workspace = true }
-bytes = { workspace = true }
-parquet = { workspace = true }
-
 # Async runtime
 futures = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
-
-# HTTP fetching (for ClickBench fixture setup)
-reqwest = { workspace = true }
 
 # CLI + serialization
 base16ct = { workspace = true }

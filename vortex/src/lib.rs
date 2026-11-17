@@ -282,12 +282,6 @@ pub mod encodings {
         pub use vortex_fsst::*;
     }
 
-    #[cfg(feature = "parquet-variant")]
-    /// Parquet Variant array encoding.
-    pub mod parquet_variant {
-        pub use vortex_parquet_variant::*;
-    }
-
     /// Pco numeric compression encoding.
     pub mod pco {
         pub use vortex_pco::*;
@@ -347,8 +341,6 @@ impl VortexSessionDefault for VortexSession {
             .with::<CompressionSession>()
             .with::<RuntimeSession>();
         vortex_arrow::initialize(&session);
-        #[cfg(feature = "parquet-variant")]
-        vortex_parquet_variant::initialize(&session);
         vortex_uuid::initialize(&session);
         editions::register_default_editions(&session);
         editions::enable_default_editions(&session);
@@ -403,32 +395,34 @@ mod test {
     #[test]
     fn convert() -> anyhow::Result<()> {
         // [convert]
-        use std::fs::File;
+        use std::sync::Arc;
 
-        use arrow_array::RecordBatchReader;
-        use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
-        use vortex::array::arrays::ChunkedArray;
+        use arrow_array::Int64Array;
+        use arrow_array::RecordBatch;
+        use arrow_array::StringArray;
+        use arrow_schema::DataType;
+        use arrow_schema::Field;
+        use arrow_schema::Schema;
         use vortex::arrow::ArrowSessionExt;
         use vortex::session::VortexSession;
 
         let session = VortexSession::default();
 
-        let reader = ParquetRecordBatchReaderBuilder::try_new(File::open(
-            "../docs/_static/example.parquet",
-        )?)?
-        .build()?;
+        let schema = Arc::new(Schema::new(vec![
+            Field::new("id", DataType::Int64, false),
+            Field::new("name", DataType::Utf8, true),
+        ]));
+        let batch = RecordBatch::try_new(
+            Arc::clone(&schema),
+            vec![
+                Arc::new(Int64Array::from_iter_values(0..1000)),
+                Arc::new(StringArray::from_iter(
+                    (0..1000).map(|i| (i % 3 != 0).then(|| format!("row-{i}"))),
+                )),
+            ],
+        )?;
 
-        let dtype = session
-            .arrow()
-            .from_arrow_schema(reader.schema().as_ref())?;
-        let chunks: Vec<_> = reader
-            .map(|record_batch| {
-                let batch = record_batch?;
-                let schema = batch.schema();
-                session.arrow().from_arrow_record_batch(batch, &schema)
-            })
-            .collect::<VortexResult<_>>()?;
-        let vortex_array = ChunkedArray::try_new(chunks, dtype)?.into_array();
+        let vortex_array = session.arrow().from_arrow_record_batch(batch, &schema)?;
         // [convert]
 
         assert_eq!(vortex_array.len(), 1000);

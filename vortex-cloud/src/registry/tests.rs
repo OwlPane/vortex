@@ -18,16 +18,15 @@ fn registry() -> Registry {
     Registry::with_vars([("AWS_REGION".to_string(), "us-east-3".to_string())])
 }
 
-/// A percent-encoded segment (as HuggingFace dataset URLs use for `refs/convert/parquet`) decodes
+/// A percent-encoded segment (as HuggingFace dataset URLs use for `refs/pr/1`) decodes
 /// to more path parts than the raw URL has segments. Both the build-and-cache branch and the
 /// cached-store branch must decode it rather than underflowing the segment-count subtraction.
 #[test]
 fn test_resolve_percent_encoded_path() -> Result<(), Box<dyn std::error::Error>> {
     let registry = registry();
-    let url = Url::parse(
-        "https://example.com/datasets/org/name/resolve/refs%2Fconvert%2Fparquet/dir/file.vortex",
-    )?;
-    let expected = Path::from("datasets/org/name/resolve/refs/convert/parquet/dir/file.vortex");
+    let url =
+        Url::parse("https://example.com/datasets/org/name/resolve/refs%2Fpr%2F1/dir/file.vortex")?;
+    let expected = Path::from("datasets/org/name/resolve/refs/pr/1/dir/file.vortex");
 
     // First resolution parses and registers the store; it must decode the path, not panic.
     let (_store, path) = registry.resolve(&url)?;
@@ -155,7 +154,7 @@ fn test_registered_store_wins_over_build() -> Result<(), Box<dyn std::error::Err
 #[rstest::rstest]
 #[case("hf://datasets/org/name/data/train.vortex", "data/train.vortex")]
 #[case(
-    "hf://datasets/org/name@refs%2Fconvert%2Fparquet/data/train.vortex",
+    "hf://datasets/org/name@refs%2Fpr%2F1/data/train.vortex",
     "data/train.vortex"
 )]
 #[case("hf://org/name/model.vortex", "model.vortex")]

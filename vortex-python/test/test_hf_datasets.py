@@ -441,7 +441,7 @@ class _FakeHfApi:
     def list_repo_files(self, repo_id: str, *, repo_type: str | None = None, revision: str | None = None) -> list[str]:
         assert repo_id == "org/name"
         assert repo_type == "dataset"
-        assert revision in (None, "refs/convert/parquet")
+        assert revision in (None, "refs/pr/1")
         return list(self.repo_files)
 
 
@@ -521,8 +521,8 @@ def test_hub_streaming_with_token_uses_authenticated_store(monkeypatch: pytest.M
         ("hf://datasets/org/name/train.vortex", ("org/name", None, "train.vortex")),
         ("hf://datasets/org/name/data/nested/*.vortex", ("org/name", None, "data/nested/*.vortex")),
         (
-            "hf://datasets/org/name@refs%2Fconvert%2Fparquet/data/*.vortex",
-            ("org/name", "refs/convert/parquet", "data/*.vortex"),
+            "hf://datasets/org/name@refs%2Fpr%2F1/data/*.vortex",
+            ("org/name", "refs/pr/1", "data/*.vortex"),
         ),
     ],
 )
@@ -564,7 +564,7 @@ def test_hf_uri_slash_revision_stays_percent_encoded(monkeypatch: pytest.MonkeyP
     monkeypatch.setattr(vx_datasets, "HfApi", _FakeHfApi)
 
     files, store = vx_datasets._resolve_data_files(
-        "hf://datasets/org/name@refs%2Fconvert%2Fparquet",
+        "hf://datasets/org/name@refs%2Fpr%2F1",
         data_files=None,
         split="train",
         revision=None,
@@ -579,8 +579,8 @@ def test_hf_uri_slash_revision_stays_percent_encoded(monkeypatch: pytest.MonkeyP
     assert store is None
     assert files == {
         "train": [
-            "hf://datasets/org/name@refs%2Fconvert%2Fparquet/data/validation.vortex",
-            "hf://datasets/org/name@refs%2Fconvert%2Fparquet/train.vortex",
+            "hf://datasets/org/name@refs%2Fpr%2F1/data/validation.vortex",
+            "hf://datasets/org/name@refs%2Fpr%2F1/train.vortex",
         ]
     }
 
@@ -614,7 +614,7 @@ def test_local_directory_in_data_files(tmp_path: Path) -> None:
     [
         ("**/*.vortex", "train.vortex", True),
         ("**/*.vortex", "data/nested/train.vortex", True),
-        ("**/*.vortex", "train.parquet", False),
+        ("**/*.vortex", "train.csv", False),
         ("*.vortex", "train.vortex", True),
         ("*.vortex", "data/train.vortex", False),
         ("data/**/*.vortex", "data/train.vortex", True),

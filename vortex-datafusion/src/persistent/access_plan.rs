@@ -31,12 +31,9 @@ use vortex::scan::selection::Selection;
 /// ```
 ///
 /// This is a low-level integration point for systems building their own access
-/// paths on top of DataFusion. For a conceptually similar Parquet example, see
-/// DataFusion's
-/// [`parquet_advanced_index`].
+/// paths on top of DataFusion.
 ///
 /// [`PartitionedFile`]: datafusion_datasource::PartitionedFile
-/// [`parquet_advanced_index`]: https://github.com/apache/datafusion/blob/47df535d2cd5aac5ad5a92bdc837f38e05ea0f0f/datafusion-examples/examples/data_io/parquet_advanced_index.rs
 #[derive(Default)]
 pub struct VortexAccessPlan {
     selection: Option<Selection>,

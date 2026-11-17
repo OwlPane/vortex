@@ -12,7 +12,7 @@ Guidance for Claude, Codex and other coding agents working in the Vortex reposit
 
 Vortex is a Rust monorepo for columnar array processing, compression encodings, and file IO.
 The workspace also contains Java bindings in `java/`, Python bindings in `vortex-python/`,
-documentation in `docs/`, and benchmark tooling in `vortex-bench/` and `benchmarks/`.
+documentation in `docs/`, and benchmark support in `benchmarks/`.
 
 ## Repository Layout
 
@@ -214,18 +214,6 @@ These CI checks are the ones most often missed when adding files rather than edi
 - If an existing `foo.rs` module needs many tests, promote it to a directory module:
   `foo/mod.rs` plus `foo/tests.rs`, included from `foo/mod.rs` behind the appropriate test
   configuration.
-
-## Benchmark Data
-
-- Parquet written by data generators (`vortex-bench`, `benchmarks/`, `vortex-sqllogictest`)
-  must use zstd level 3, never Snappy. Set it explicitly: parquet-rs defaults to uncompressed and
-  its `ZstdLevel::default()` is level 1, while DuckDB `COPY`/`EXPORT DATABASE` and `tpchgen-cli`
-  default to Snappy.
-  - parquet-rs: `Compression::ZSTD(ZstdLevel::try_new(3)?)`
-  - DuckDB: `(FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 3)`
-  - tpchgen-cli: `parquet --compression='ZSTD(3)'`
-- Benchmarks that deliberately compare Parquet codecs, such as the GPU compress benchmark's
-  `--codec`, are exempt.
 
 ## Common Mistakes
 

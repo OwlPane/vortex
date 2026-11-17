@@ -57,7 +57,7 @@ enum Commands {
         #[arg(long, value_name = "DIR")]
         output: PathBuf,
 
-        /// Fixture name substrings to exclude (comma-separated, e.g. "clickbench,tpch").
+        /// Fixture name substrings to exclude (comma-separated, e.g. "tpch,chunked").
         #[arg(long, value_delimiter = ',', value_name = "PATTERNS")]
         exclude: Vec<String>,
     },

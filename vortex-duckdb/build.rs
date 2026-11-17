@@ -421,11 +421,11 @@ fn build_duckdb(version: &DuckDBVersion, duckdb_repo_dir: &Path) {
     // statically, otherwise DuckDB tries to load them from an http endpoint
     // with version 0.0.1 (all non-tagged builds) which doesn't exist.
     let (static_extensions, link_extensions) = match version {
-        DuckDBVersion::Release(_) => ("parquet", "0"),
-        // tpch/tpcds/parquet needed for benchmarks
+        DuckDBVersion::Release(_) => ("", "0"),
+        // tpch/tpcds needed for TPC data generation
         // icu needed for timestamptz tests
         // httpfs needed for s3 write test
-        DuckDBVersion::Commit(_) => ("parquet;tpch;tpcds;icu;httpfs", "1"),
+        DuckDBVersion::Commit(_) => ("tpch;tpcds;icu;httpfs", "1"),
     };
 
     let envs = [

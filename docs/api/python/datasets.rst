@@ -11,7 +11,7 @@ dependencies with:
 ``vortex.datasets.load_dataset`` accepts a local path or glob, a URL readable by Vortex
 (``https://``, ``s3://``, ``gs://``, ``az://``), a Hugging Face Hub dataset repository id, or an
 ``hf://`` URI of the form ``hf://datasets/<org>/<name>[@<revision>][/<path-or-glob>]`` (revisions
-containing ``/`` must be percent-encoded, e.g. ``@refs%2Fconvert%2Fparquet``).
+containing ``/`` must be percent-encoded, e.g. ``@refs%2Fpr%2F1``).
 Unlike ``datasets.load_dataset``, it defaults to ``streaming=True`` and returns a streaming
 dataset that keeps Vortex in charge of reading. Column selection, Vortex filter expressions, and
 row limits are pushed down into each Vortex scan before examples are yielded to Hugging Face

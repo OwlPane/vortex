@@ -24,7 +24,7 @@ around the latest research from the database community.
 [**Read & write Vortex files**](getting-started/index.md)
 
 Get started with Vortex in **Python**, **Rust**, **C++**, or **Java**. Convert
-from Parquet, compress your data, and query it.
+from Arrow, compress your data, and query it.
 :::
 
 :::{container} card

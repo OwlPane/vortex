@@ -1,7 +1,0 @@
-# SPDX-License-Identifier: Apache-2.0
-# SPDX-FileCopyrightText: Copyright the Vortex contributors
-
-query R
-SELECT AVG("UserID") FROM hits;
-----
-1948194877894919400

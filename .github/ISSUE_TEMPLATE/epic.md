@@ -58,8 +58,8 @@ Cover both:
 Why this, why now? Cover:
 
 - The concrete problem and who/what hits it. Examples: a downstream integration
-  (DataFusion, DuckDB, Python, Java), a benchmark gap (TPC-H, ClickBench,
-  vortex-bench), or a file format or encoding limitation.
+  (DataFusion, DuckDB, Python, Java), a benchmark gap, or a file format or
+  encoding limitation.
 - What is currently blocked, slower, or larger than it should be. Link the
   benchmark numbers, profile output, or related issues.
 

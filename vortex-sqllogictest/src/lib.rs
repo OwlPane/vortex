@@ -5,9 +5,11 @@
 //! against both DataFusion and DuckDB configured to read Vortex files.
 //!
 //! The binary itself lives in `bin/sqllogictests-runner.rs`; this crate exposes
-//! the DuckDB [`sqllogictest::AsyncDB`](duckdb::DuckDB) adapter and file
-//! discovery [`utils`].
+//! the DataFusion and DuckDB [`sqllogictest::AsyncDB`] adapters
+//! ([`datafusion_engine::DataFusion`], [`duckdb::DuckDB`]) and file discovery
+//! [`utils`].
 
+pub mod datafusion_engine;
 pub mod duckdb;
 pub mod normalize;
 pub mod scratch;

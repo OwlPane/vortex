@@ -40,9 +40,8 @@ Optional. Skip if this is a sub-issue of an Epic that already covers the why.
 For standalone tracking issues, cover:
 
 - The concrete problem and who hits it. Examples: a downstream integration
-  (DataFusion, DuckDB, Python, Java), a benchmark gap (TPC-H, ClickBench,
-  vortex-bench), a regression against Parquet or Arrow, or a file format or
-  encoding limitation.
+  (DataFusion, DuckDB, Python, Java), a benchmark gap, a regression against
+  Arrow, or a file format or encoding limitation.
 - What is currently blocked, slower, or larger than it should be. Link the
   benchmark numbers, profile output, or related issues.
 -->

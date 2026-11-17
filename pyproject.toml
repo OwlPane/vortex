@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 authors = [{ name = "Nicholas Gates", email = "nick@nickgates.com" }]
 requires-python = ">= 3.11"
-dependencies = ["bench-orchestrator", "vortex-data", "docs"]
+dependencies = ["vortex-data", "docs"]
 
 [build-system]
 requires = ["hatchling"]
@@ -36,10 +36,9 @@ required-version = ">=0.11.8"
 exclude-newer = "7 days"
 
 [tool.uv.workspace]
-members = ["bench-orchestrator", "vortex-python", "docs"]
+members = ["vortex-python", "docs"]
 
 [tool.uv.sources]
-bench-orchestrator = { workspace = true }
 vortex-data = { workspace = true }
 # Resolve vortex-data-cuda from its local path so the optional `cuda` extra is
 # lockable before the package is published to PyPI. A path source (not
@@ -73,8 +72,6 @@ suppress-none-returning = true
 "**/test*/**/*.py" = ["ANN001"]
 # These integration hooks receive values from untyped external runtimes.
 "docs/conf.py" = ["ANN001"]
-"scripts/cudf-parquet-read.py" = ["ANN001"]
-"scripts/post-ingest.py" = ["ANN001"]
 "scripts/vortex_gdb.py" = ["ANN001"]
 
 [tool.ruff.lint.isort]

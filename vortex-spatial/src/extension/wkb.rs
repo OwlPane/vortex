@@ -83,7 +83,7 @@ impl TryFrom<ExtensionArray> for WellKnownBinaryData {
 /// An [extension type][ExtVTable] for OGC Well-known Binary (WKB) data format.
 ///
 /// This is one of the most common formats for sharing of geometry data between analytic systems,
-/// used by DuckDB, PostGIS and GeoParquet.
+/// used by DuckDB and PostGIS.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
 pub struct WellKnownBinary;
 

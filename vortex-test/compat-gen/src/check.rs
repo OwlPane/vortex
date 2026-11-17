@@ -15,6 +15,10 @@ use vortex_session::VortexSession;
 
 use crate::adapter;
 use crate::fixtures::all_fixtures;
+/// File-name prefixes of fixtures that are no longer generated. Corpora published by older
+/// versions may still contain them, so they are skipped rather than reported as unknown.
+const RETIRED_FIXTURE_PREFIXES: &[&str] = &["clickbench_hits_"];
+
 /// How to handle mismatches between directory and known fixtures.
 #[derive(Clone, ValueEnum)]
 pub enum Mode {
@@ -98,6 +102,14 @@ pub fn check(dir: &Path, mode: Mode, exclude: &[String]) -> VortexResult<()> {
 
     // Check for unknown files in the directory.
     for file_name in &dir_files {
+        if RETIRED_FIXTURE_PREFIXES
+            .iter()
+            .any(|prefix| file_name.starts_with(prefix))
+        {
+            eprintln!("  skip {file_name} (retired)");
+            result.skipped.push(file_name.clone());
+            continue;
+        }
         if !fresh_files.contains(file_name) {
             match mode {
                 Mode::Exact | Mode::Superset => {

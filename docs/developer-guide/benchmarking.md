@@ -1,7 +1,6 @@
 # Benchmarking
 
-Vortex has two categories of benchmarks: microbenchmarks for individual operations, and SQL
-benchmarks for end-to-end query performance.
+Vortex benchmarks are microbenchmarks for individual operations.
 
 ## Microbenchmarks
 
@@ -287,84 +286,3 @@ unless the pull request changes the code that the benchmark measures.
 | `row_fn_utf8_input`: `starts_with[8 and 64, VarBin]` | AVX2 and AVX-512 legs | 12% to 17% slower in 40% to 50% of runs |
 | `bitpacking_take`: `isolated_runs[u32, (16, 0)]` | Simulation | 78 µs or 88 µs |
 | `chunk_array_builder`: `chunked_opt_bool_canonical_into[(1000, 10)]` | Simulation | 55 µs or 65.5 µs |
-
-## SQL Benchmarks
-
-SQL benchmarks measure end-to-end query performance across different engines and file formats.
-The `vortex-bench` crate provides a common `Benchmark` trait that each benchmark suite
-implements, defining its queries, data generation, and expected results.
-
-Available suites include TPC-H, TPC-DS, ClickBench, FineWeb, and others. Each suite can be
-run against multiple engines (DataFusion, DuckDB) and formats (Parquet, Vortex, Vortex Compact,
-Lance, DuckDB native).
-
-### Data Generation
-
-Before running SQL benchmarks, test data must be generated:
-
-```bash
-uv run --project bench-orchestrator vx-bench prepare-data <benchmark> --format parquet,vortex
-```
-
-The data generator creates base Parquet data and converts it to each requested format. Scale
-factors are configurable per suite (e.g. `--opt scale-factor=10.0` for TPC-H SF=10).
-
-### Running SQL Benchmarks
-
-SQL benchmarks can be run directly via their per-engine binaries:
-
-```bash
-cargo run --release --bin datafusion-bench -- <benchmark>
-cargo run --release --bin duckdb-bench -- <benchmark>
-```
-
-## Orchestrator
-
-The `bench-orchestrator` is a Python CLI tool (`vx-bench`) that coordinates running SQL
-benchmarks across multiple engines, stores results, and provides comparison tooling.
-
-See [`bench-orchestrator/README.md`](https://github.com/vortex-data/vortex/blob/develop/bench-orchestrator/README.md) for installation,
-commands, and example workflows.
-
-For CI, the reusable SQL workflow now drives `vx-bench` directly:
-
-```bash
-uv run --project bench-orchestrator vx-bench prepare-data tpch \
-  --formats-json '["parquet","vortex","vortex-compact"]' \
-  --opt scale-factor=1.0
-
-uv run --project bench-orchestrator vx-bench run tpch \
-  --targets-json '[{"engine":"datafusion","format":"parquet"},{"engine":"duckdb","format":"vortex"}]' \
-  --output results.json \
-  --no-build
-```
-
-## CI Benchmarks
-
-Benchmarks run automatically on all commits to `develop` and can be run on-demand for PRs:
-
-- **Post-commit** -- compression, string encoding, random access, and SQL benchmarks run on every
-  commit to `develop`, with results uploaded for historical tracking.
-- **Random access** -- `action/bench-random-access` runs only the random-access benchmark.
-- **Random access (S3)** -- `action/bench-random-access-s3` runs the random-access benchmark
-  against data uploaded to S3 instead of local disk.
-- **Compression** -- `action/bench-compress` runs only the compression benchmark.
-- **String encoding** -- `action/bench-string` runs only the string encoding benchmark.
-- **GPU compression** -- `action/bench-gpu-compress` runs the allow-listed Vortex decompression
-  cases on a GPU runner.
-- **SQL** -- `action/bench-sql` runs the `pr` preset, a quick core subset of the SQL benchmarks
-  that excludes `vortex-compact`, Clickbench Sorted, Appian, JOB, statpopgen, FineWeb on S3,
-  TPC-H SF=10 on S3, and Vortex queries.
-- **SQL Extended** -- `action/bench-sql-extended` runs the `pr-full` preset: every regular SQL
-  benchmark, including `vortex-compact` and DuckDB-format targets.
-- **SQL Compact** -- `action/bench-sql-compact` runs the `pr-compact` preset, which benchmarks
-  `vortex-compact` plus Parquet control rows used to distinguish code changes from runner drift.
-- **All CPU benchmarks** -- `action/bench-all` runs random access, compression, string encoding,
-  and the `pr-all` SQL preset, the union of the `pr`, `pr-compact`, and `pr-full` coverage, without
-  repeating shared jobs. Do not combine it with other benchmark labels;
-  GPU compression is the only exception.
-
-All CI benchmarks run on dedicated instances with the `release_debug` profile and
-`-C target-cpu=native` to produce representative numbers.
-
-Results can be viewed at [bench.vortex.dev](https://bench.vortex.dev).

@@ -161,7 +161,7 @@ DataType
 
 First, you want to create a schema. DataType is a logical representation of
 Vortex's type system. "Logical" as opposed to "physical" means DataType doesn't
-know what encodings the data use. As another example, Arrow and Parquet's types
+know what encodings the data use. As another example, Arrow's types
 are physical. There's a convenience function ``struct_`` which creates a
 ``DataTypeVariant::Struct`` with fields passed as a ``initializer_list``.
 

@@ -193,8 +193,6 @@ benchmarks/.out
 
 # Scratch
 *.vortex
-*.parquet
-!docs/_static/example.parquet
 
 # TPC-H benchmarking data
 /data/

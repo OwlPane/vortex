@@ -46,9 +46,8 @@ pub(crate) const MAX_METADATA_SEGMENTS: usize = 16;
 
 /// Maximum length, in UTF-8 bytes, of a user-defined metadata key (keys live in the postscript).
 ///
-/// 64 bytes covers reverse-DNS query-engine keys, not just short Iceberg-style keys: e.g.
-/// `org.apache.spark.sql.parquet.row.metadata` (41 bytes), which Spark writes into every Parquet
-/// file. With [`MAX_METADATA_SEGMENTS`] keys this bounds the postscript key budget at 1 KiB.
+/// 64 bytes covers reverse-DNS query-engine keys (often 40+ bytes), not just short
+/// Iceberg-style keys. With [`MAX_METADATA_SEGMENTS`] keys this bounds the postscript key budget at 1 KiB.
 pub(crate) const MAX_METADATA_KEY_BYTES: usize = 64;
 
 /// User-defined metadata segment locators stored as `(key, locator)` pairs.

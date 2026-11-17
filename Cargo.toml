@@ -25,7 +25,6 @@ members = [
     "vortex-file",
     "vortex-ipc",
     "vortex",
-    "vortex-bench",
     "vortex-datafusion",
     "vortex-duckdb",
     "vortex-cuda",
@@ -59,18 +58,11 @@ members = [
     "encodings/zigzag",
     "encodings/zstd",
     "encodings/bytebool",
-    "encodings/parquet-variant",
     "encodings/onpair",
     "encodings/uuid",
     "encodings/elias-fano",
     # Benchmarks
     "benchmarks/bench-support",
-    "benchmarks/lance-bench",
-    "benchmarks/compress-bench",
-    "benchmarks/datafusion-bench",
-    "benchmarks/duckdb-bench",
-    "benchmarks/random-access-bench",
-    "benchmarks/string-bench",
     "vortex-spatial",
 ]
 exclude = ["java/testfiles", "wasm-test"]
@@ -154,7 +146,6 @@ datafusion-physical-expr-adapter = { version = "55.0.0" }
 datafusion-physical-expr-common = { version = "55.0.0" }
 datafusion-physical-plan = { version = "55.0.0" }
 datafusion-pruning = { version = "55.0.0" }
-datafusion-sqllogictest = { version = "55.0.0" }
 divan = { package = "codspeed-divan-compat", version = "6.0.0" }
 enum-iterator = "2.0.0"
 env_logger = "0.11"
@@ -209,9 +200,6 @@ opentelemetry = "0.32.0"
 opentelemetry-otlp = "0.32.0"
 opentelemetry_sdk = "0.32.0"
 parking_lot = { version = "0.12.3", features = ["nightly"] }
-parquet = "59.2"
-parquet-variant = "59.2"
-parquet-variant-compute = "59.2"
 paste = "1.0.15"
 pco = "1.0.1"
 percent-encoding = "2.3.2"
@@ -253,14 +241,6 @@ similar = "3.0.0"
 sketches-ddsketch = "0.4.0"
 smallvec = "1.15.1"
 smol = "2.0.2"
-spatialbench = "0.2"
-spatialbench-arrow = "0.2"
-# spatialbench still pins arrow 56, two majors behind the workspace arrow. Until upstream
-# catches up, write its generated batches with a matching parquet instead of converting
-# arrow versions at the boundary.
-spatialbench-parquet = { package = "parquet", version = "56", features = [
-    "async",
-] }
 static_assertions = "1.1"
 strum = "0.28"
 syn = { version = "3.0.4", features = ["full"] }
@@ -329,7 +309,6 @@ vortex-layout = { version = "0.1.0", path = "./vortex-layout", default-features 
 vortex-mask = { version = "0.1.0", path = "./vortex-mask", default-features = false }
 vortex-metrics = { version = "0.1.0", path = "./vortex-metrics", default-features = false }
 vortex-onpair = { version = "0.1.0", path = "./encodings/onpair", default-features = false }
-vortex-parquet-variant = { version = "0.1.0", path = "./encodings/parquet-variant" }
 vortex-pco = { version = "0.1.0", path = "./encodings/pco", default-features = false }
 vortex-row = { version = "0.1.0", path = "./vortex-row", default-features = false }
 vortex-scan = { version = "0.1.0", path = "./vortex-scan", default-features = false }
@@ -345,7 +324,6 @@ vortex-zstd = { version = "0.1.0", path = "./encodings/zstd", default-features =
 # END crates published by this project
 
 # No version constraints for unpublished crates.
-vortex-bench = { path = "./vortex-bench", default-features = false }
 vortex-bench-support = { path = "./benchmarks/bench-support" }
 vortex-cuda = { path = "./vortex-cuda", default-features = false }
 vortex-cuda-driver = { path = "./vortex-cuda/driver" }

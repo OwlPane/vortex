@@ -149,7 +149,7 @@ impl Debug for VortexFormat {
 extensions_options! {
     /// Options to configure [`VortexFormat`] and [`VortexSource`].
     ///
-    /// The API follows DataFusion's built-in Parquet and JSON format factories:
+    /// The API follows DataFusion's built-in JSON format factory:
     /// a format factory may carry customized defaults, the session may carry
     /// format defaults, and `CREATE EXTERNAL TABLE ... OPTIONS(...)` can
     /// override individual fields for one table.
@@ -161,7 +161,6 @@ extensions_options! {
     ///    [`VortexFormatFactory::with_options`] or
     ///    [`VortexFormatFactory::new_with_options`], start from that complete
     ///    `VortexTableOptions` value. This matches
-    ///    [`ParquetFormatFactory::new_with_options`] and
     ///    [`JsonFormatFactory::new_with_options`]: factory options replace
     ///    session defaults; they are not merged with them field-by-field.
     /// 2. If the factory does not have explicit options, read the session's
@@ -174,7 +173,7 @@ extensions_options! {
     ///    options or the session/default value.
     ///
     /// In SQL, session settings use the `vortex.` prefix. Table options use the
-    /// field names directly, the same style as Parquet or JSON table options:
+    /// field names directly, the same style as JSON table options:
     ///
     /// ```text
     /// SET vortex.predicate_pushdown = false;
@@ -200,7 +199,6 @@ extensions_options! {
     /// ```
     ///
     /// [`SessionConfig`]: https://docs.rs/datafusion/latest/datafusion/prelude/struct.SessionConfig.html
-    /// [`ParquetFormatFactory::new_with_options`]: https://docs.rs/datafusion/latest/datafusion/datasource/file_format/parquet/struct.ParquetFormatFactory.html#method.new_with_options
     /// [`JsonFormatFactory::new_with_options`]: https://docs.rs/datafusion/latest/datafusion/datasource/file_format/json/struct.JsonFormatFactory.html#method.new_with_options
     pub struct VortexTableOptions {
         /// Use the planner-driven V2 scan executor for supported layouts.
@@ -314,8 +312,8 @@ fn object_store_reader(
 ///
 /// The factory stores a [`VortexSession`] and optional factory-level
 /// [`VortexTableOptions`]. When options are set on the factory they act like
-/// customized format defaults, matching DataFusion's Parquet and JSON factory
-/// APIs. Otherwise, `VortexFormatFactory::create` uses the session's `vortex`
+/// customized format defaults, matching DataFusion's JSON factory
+/// API. Otherwise, `VortexFormatFactory::create` uses the session's `vortex`
 /// options. In both cases, table `OPTIONS(...)` are applied last for the table
 /// being created.
 ///
@@ -461,7 +459,7 @@ impl FileFormatFactory for VortexFormatFactory {
         state: &dyn Session,
         format_options: &std::collections::HashMap<String, String>,
     ) -> DFResult<Arc<dyn FileFormat>> {
-        // This mirrors DataFusion's Parquet/JSON file-format factories:
+        // This mirrors DataFusion's JSON file-format factory:
         //
         // 1. Factory options are a complete customized default when present.
         // 2. Without factory options, use the session's `vortex` extension

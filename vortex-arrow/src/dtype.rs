@@ -7,8 +7,8 @@
 //! Vortex treats encodings as separate from logical types.
 //!
 //! The conversions in this module are "naive": every logical type is encoded in its simplest
-//! corresponding Arrow type, and Arrow extension types (other than the builtin temporal types and
-//! Parquet Variant) are not understood. The authoritative, plugin-aware conversion entry point is
+//! corresponding Arrow type, and Arrow extension types (other than the builtin temporal types) are
+//! not understood. The authoritative, plugin-aware conversion entry point is
 //! [`ArrowSession`](crate::ArrowSession), through its `to_arrow_schema` / `to_arrow_datatype` /
 //! `from_arrow_schema` / `from_arrow_field` / `from_arrow_datatype` methods.
 //!
@@ -175,17 +175,8 @@ pub(crate) fn from_arrow_data_type(
     })
 }
 
-/// Naive conversion of an Arrow [`Field`] to a Vortex [`DType`]. Only the builtin
-/// `arrow.parquet.variant` extension metadata is recognized.
+/// Naive conversion of an Arrow [`Field`] to a Vortex [`DType`]. Extension metadata is ignored.
 pub(crate) fn from_arrow_field_naive(field: &Field) -> VortexResult<DType> {
-    if field
-        .metadata()
-        .get("ARROW:extension:name")
-        .map(|s| s.as_str())
-        == Some("arrow.parquet.variant")
-    {
-        return Ok(DType::Variant(field.is_nullable().into()));
-    }
     from_arrow_data_type(field.data_type(), field.is_nullable().into())
 }
 
@@ -276,9 +267,7 @@ pub(crate) fn to_data_type_naive(dtype: &DType) -> VortexResult<DataType> {
             DataType::Struct(Fields::from(fields))
         }
         DType::Union(..) => vortex_bail!("TODO(connor)[Union]: unimplemented"),
-        DType::Variant(_) => vortex_bail!(
-            "DType::Variant requires Arrow Field metadata; use to_arrow_schema or a Field helper"
-        ),
+        DType::Variant(_) => vortex_bail!("DType::Variant has no Arrow representation"),
         DType::Extension(ext_dtype) => {
             // NOTE: Temporal are the only builtin and default-loaded extension types, and they map
             // directly onto non-extension Arrow physical encodings. For this reason, we

@@ -457,7 +457,7 @@ mod tests {
             .ok_or_else(|| vortex_err!("uncompressed size result should not be null"))
     }
 
-    /// A view array whose rows point into one shared data buffer, like Arrow's Parquet reader
+    /// A view array whose rows point into one shared data buffer, like a columnar file reader
     /// builds, sliced to `rows`.
     fn views_into_shared_page(rows: std::ops::Range<usize>) -> VortexResult<ArrayRef> {
         const VALUE_LEN: u32 = 27;

@@ -139,9 +139,9 @@ applied directly:
 {func}`~vortex.open` lazily opens a Vortex file for reading:
 
 ```{doctest} pycon
->>> import pyarrow.parquet as pq
+>>> import pyarrow.feather as feather
 >>>
->>> vx.io.write(pq.read_table("_static/example.parquet"), 'example.vortex')
+>>> vx.io.write(feather.read_table("_static/example.arrow"), 'example.vortex')
 >>>
 >>> f = vx.open('example.vortex')
 >>> len(f)

@@ -31,7 +31,7 @@ use crate::dtype::FieldNames;
 /// non-consecutive tags lets the schema remove children without renumbering the remaining tags.
 ///
 /// Variant names must be distinct. Unlike [`StructFields`](crate::dtype::StructFields), which
-/// permits duplicate field names for Arrow/Parquet round-trip fidelity, duplicates have no
+/// permits duplicate field names for Arrow round-trip fidelity, duplicates have no
 /// meaningful semantics in a sum type and are rejected at construction.
 ///
 /// Note that the Arrow spec does not require distinct names (children are selected by the type-id

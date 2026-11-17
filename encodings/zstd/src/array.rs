@@ -1212,7 +1212,7 @@ impl ZstdData {
         ctx: &mut ExecutionCtx,
     ) -> VortexResult<Self> {
         // Approach for strings: we prefix each string with its length as a u32.
-        // This is the same as what Parquet does. In some cases it may be better
+        // This is a common columnar-format layout. In some cases it may be better
         // to separate the binary data and lengths as two separate streams, but
         // this approach is simpler and can be best in cases when there is
         // mutual information between strings and their lengths.
